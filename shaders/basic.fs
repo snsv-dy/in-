@@ -1,4 +1,4 @@
-#version 300 es
+#version 460 core
 
 precision mediump float;
 
@@ -18,14 +18,15 @@ vec3 getNorm(vec2 pos) {
 }
 
 float elevationFunc(vec2 pos) {
-	pos *= 5.0;
-	return sin(pos.x) + cos(pos.y);
+	pos *= 4.0;
+	float rd = 0.3;
+	return sin(pos.x) * cos(pos.y) * rd;
 }
 
 
 void main() {
 
-	vec3 sunPos = vec3(0.0, -0.0, -10.0);
+	vec3 sunPos = vec3(0.0, 2.0, -2.0);
 
 	vec3 samples[4];
 	samples[0] = vec3(1.0, 1.0, 0.0);
@@ -33,23 +34,30 @@ void main() {
 	samples[2] = vec3(0.7, 0.7, 1.0);
 	samples[3] = vec3(1.0, 0.0, 0.0);
 
-	vec3 col = vec3(0.0);
-	if (position.x > 0.0) {
-		col += position.x * samples[0];
-	} else {
-		col += -position.x * samples[1];
-	}
+	// vec3 col = vec3(0.0);
+	// if (position.x > 0.0) {
+	// 	col += position.x * samples[0];
+	// } else {
+	// 	col += -position.x * samples[1];
+	// }
 	
-	if (position.y > 0.0) {
-		col += position.y * samples[2];
+	// if (position.y > 0.0) {
+	// 	col += position.y * samples[2];
+	// } else {
+	// 	col += -position.y * samples[3];
+	// }
+	// col /= 2.0;
+	float mid = 0.1;
+	vec3 col = vec3(1.0, 1.0, 1.0);
+	if (position.y > mid) {
+		col = samples[0];
 	} else {
-		col += -position.y * samples[3];
+		col = samples[1];
 	}
-	col /= 2.0;
-	col = vec3(1.0, 1.0, 1.0);
 
 	float diff = dot(getNorm(position.xz), normalize(sunPos));
 	col *= diff;
+	// col = vec3(1.0, abs(position.y), abs(position.z));
 
 	FragColor = vec4(col, 1.0);
 }

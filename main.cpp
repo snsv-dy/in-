@@ -94,7 +94,7 @@ int opengl_context(GLFWwindow* window) {
 	float *gridData = new float[gridDataSize];
 	setFlatGrid(gridData, gridSize);
 	setBufferData(VAO, VBO, gridData, gridDataSize);
-
+	
 
 
 
@@ -118,22 +118,34 @@ int opengl_context(GLFWwindow* window) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbTexture, 0);
 
+	unsigned int rbo;
+	glGenRenderbuffers(1, &rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 500, 500);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
 	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
 		// 🤔
 		printf("Framebuffer Ok!\n");
 	}
 	//
 	//
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glm::mat4 projection = glm::perspective(glm::radians(55.0f), 1.0f, 0.1f, 1000.0f);
-	glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -7.0f));
-	glm::mat4 model = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(1.0f, 0.5f, 0.0f));
+	glm::vec2 cameraRotation = glm::vec2(0.0f);
+	glm::vec3 cameraOrigin = glm::vec3(0.0f, 0.0f, -4.0f);
+	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::mat4 view = glm::lookAt(cameraOrigin, -cameraOrigin, cameraUp);
+	// glm::mat4 model = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(1.0f, 0.5f, 0.0f));
+	glm::mat4 model = glm::mat4(1.0f);
 
 	unsigned int projectionLocation = glGetUniformLocation(shader.getProgram(), "projection");
 	unsigned int viewLocation = glGetUniformLocation(shader.getProgram(), "view");
 	unsigned int modelLocation = glGetUniformLocation(shader.getProgram(), "model");
 
 	int lastWindowSize[2] = {-1, -1};
+	ImGui::GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
 
 	while (!glfwWindowShouldClose(window)) {
 		
@@ -158,12 +170,36 @@ int opengl_context(GLFWwindow* window) {
 		}
 
 		//
+		// Model rotation
+		if(ImGui::IsWindowFocused() && ImGui::IsMouseDragging(0)) {
+			ImVec2 delta = ImGui::GetMouseDragDelta();
+			const float mouseSensitivity = 0.5;
+			cameraRotation.x -= delta.x * mouseSensitivity;
+			cameraRotation.y -= delta.y * mouseSensitivity;
+			if (cameraRotation.y <= -89.9f) {
+				cameraRotation.y = -89.9f;
+			} else if (cameraRotation.y >= 89.9f) {
+				cameraRotation.y = 89.9f;
+			}
+			printf("dx: %2.2f, rot: %2.2f\n", delta.x, cameraRotation.x);
+
+			glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraRotation.x), glm::vec3(0.0f, 1.0f, 0.0f));
+			rotationMatrix = glm::rotate(rotationMatrix, glm::radians(cameraRotation.y), glm::vec3(1.0f, 0.0f, 0.0f));
+			glm::vec3 cameraPos = glm::vec3(rotationMatrix * glm::vec4(cameraOrigin, 1.0f));
+			view = glm::lookAt(cameraPos, -cameraPos, cameraUp);
+			ImGui::ResetMouseDragDelta();
+		}
+		//
+		//
+
+		//
 		// 3d drawing
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glEnable(GL_DEPTH_TEST);
 		glViewport(0, 0, 500, 500);
-		
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		shader.use();
 		glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));

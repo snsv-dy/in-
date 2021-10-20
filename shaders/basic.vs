@@ -1,4 +1,4 @@
-#version 300 es
+#version 460 core
 
 in vec3 pos;
 out vec3 position;
@@ -8,9 +8,9 @@ uniform mat4 view;
 uniform mat4 model;
 
 float elevationFunc(vec2 pos) {
-	pos *= 1.0;
-	float rd = 0.01;
-	return sin(pos.x) * cos(pos.y);
+	pos *= 4.0;
+	float rd = 0.3;
+	return sin(pos.x) * cos(pos.y) * rd;
 }
 
 void main() {
