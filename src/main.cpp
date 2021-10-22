@@ -13,10 +13,13 @@
 #include <cstdlib>
 #include <cstdio>
 
+#include <imnodes/imnodes.h>
+#include "NodeEditor.hpp"
+
 #include "Shader.hpp"
 
-int screen_width = 800;
-int screen_height = 800;
+int screen_width = 1200;
+int screen_height = 1000;
 const char* glsl_version = "#version 460";
 
 int opengl_context(GLFWwindow* window);
@@ -69,6 +72,7 @@ int opengl_context(GLFWwindow* window) {
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	(void)io;
+	NodeEditor node_editor;
 
 	ImGui::StyleColorsDark();
 
@@ -181,7 +185,6 @@ int opengl_context(GLFWwindow* window) {
 			} else if (cameraRotation.y >= 89.9f) {
 				cameraRotation.y = 89.9f;
 			}
-			printf("dx: %2.2f, rot: %2.2f\n", delta.x, cameraRotation.x);
 
 			glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraRotation.x), glm::vec3(0.0f, 1.0f, 0.0f));
 			rotationMatrix = glm::rotate(rotationMatrix, glm::radians(cameraRotation.y), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -222,6 +225,16 @@ int opengl_context(GLFWwindow* window) {
 		ImGui::Begin("Paramz");
 		ImGui::Text("pos: %f %f", pos.x, pos.y);
 		ImGui::Text("size: %f %f", size.x, size.y);
+		ImGui::Checkbox("keyCtrl", &ImGui::GetIO().KeyCtrl);
+		ImGui::Text("Links size: %d\n", node_editor.getLinksSize());
+		ImGui::End();
+
+		//
+		// Node editor
+		node_editor.draw();
+		//
+		//
+
 		ImGui::End();
 		
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -235,8 +248,14 @@ int opengl_context(GLFWwindow* window) {
 		glfwWaitEvents();
 	}
 
+	glDeleteBuffers(1, &VBO);
+	glDeleteVertexArrays(1, &VAO);
 	glDeleteFramebuffers(1, &fbo);
+	glDeleteTextures(1, &fbTexture);
 	delete[] gridData;
+
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui::DestroyContext();
 }
 
 std::pair<unsigned int, unsigned int> createBufferForGridSize(unsigned int size) {

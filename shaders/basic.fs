@@ -52,7 +52,7 @@ void main() {
 	if (position.y > mid) {
 		col = samples[0];
 	} else {
-		col = samples[1];
+		col = samples[2];
 	}
 
 	float diff = dot(getNorm(position.xz), normalize(sunPos));
