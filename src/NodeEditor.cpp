@@ -6,46 +6,94 @@ NodeEditor::NodeEditor() {
 	ImNodes::StyleColorsDark();
     // ImNodes::PushAttributeFlag(ImNodesAttributeFlags_EnableLinkDetachWithDragClick);
     ImNodes::GetIO().LinkDetachWithModifierClick.Modifier = &ImGui::GetIO().KeyCtrl;
+
+	UiNode node1;
+	node1.id = ++current_id;
+	node1.input = ++current_id;
+	node1.output = ++current_id;
+
+	UiNode node2;
+	node2.id = ++current_id;
+	node2.input = ++current_id;
+	node2.output = ++current_id;
+
+	// nodes[node1.id] = node1;
+	// nodes[node2.id] = node2;
+	nodes.push_back(node1);
+	nodes.push_back(node2);
 }
 
 void NodeEditor::draw() {
 	ImGui::Begin("Nodes");
 	ImNodes::BeginNodeEditor();
 
-	ImNodes::BeginNode(1);
+	const bool node_add_popup = ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) &&
+								ImNodes::IsEditorHovered() &&
+								ImGui::IsMouseReleased(1);
+	
+	if (ImGui::IsAnyItemHovered && node_add_popup) {
+		ImGui::OpenPopup("Add node");
+	} 
+	// else {
+	// 	printf("no popup: %d %d %d %d\n", !ImGui::IsAnyItemHovered(), ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows),
+	// 						ImNodes::IsEditorHovered(),
+	// 						ImGui::IsMouseReleased(2));
+	// }
 
-	ImNodes::BeginNodeTitleBar();
-	ImGui::TextUnformatted("simple node xD");
-	ImNodes::EndNodeTitleBar();
+	if (ImGui::BeginPopup("Add node")) {
+		const ImVec2 mouse_pos = ImGui::GetMousePosOnOpeningCurrentPopup();
 
-	ImNodes::BeginInputAttribute(2);
-	ImGui::Text("input");
-	ImNodes::EndInputAttribute();
+		if (ImGui::MenuItem("node")) {
+			UiNode node;
+			node.id = ++current_id;
+			node.input = ++current_id;
+			node.output = ++current_id;
 
-	ImNodes::BeginOutputAttribute(3);
-	ImGui::Indent(40);
-	ImGui::Text("output");
-	ImNodes::EndOutputAttribute();
+			nodes.push_back(node);
 
-	ImNodes::EndNode();
+			ImNodes::SetNodeScreenSpacePos(node.id, mouse_pos);
+		}
 
-	ImNodes::BeginNode(4);
 
-	ImNodes::BeginNodeTitleBar();
-	ImGui::TextUnformatted("Same things make us laugh");
-	ImNodes::EndNodeTitleBar();
+		// if (ImGui::MenuItem("node1")) {
+		// 	UiNode node;
+		// 	node.id = ++current_id;
+		// 	node.input = ++current_id;
+		// 	node.output = ++current_id;
 
-	ImNodes::BeginInputAttribute(5);
-	ImGui::Text("input");
-	ImNodes::EndInputAttribute();
+		// 	nodes[node.id] = node;
 
-	ImNodes::BeginOutputAttribute(6);
-	ImGui::Indent(40);
-	ImGui::Text("output");
-	ImNodes::EndOutputAttribute();
+		// 	ImNodes::SetNodeScreenSpacePos(node.id, mouse_pos);
+		// }
 
-	ImNodes::EndNode();
+		ImGui::EndPopup();
+	}
 
+	const float node_width = 100.0f;
+	for (UiNode& node : nodes) {
+	// for (map<int, UiNode>::iterator it = nodes.begin(); it != nodes.end(); it++) {
+		ImNodes::BeginNode(node.id);
+
+		ImNodes::BeginNodeTitleBar();
+		// string 
+		ImGui::Text("Node %d", node.id);
+		ImNodes::EndNodeTitleBar();
+
+		ImNodes::BeginInputAttribute(node.input);
+		// ImGui::Text("input");
+		// ImGui::SameLine();
+		ImGui::PushItemWidth(node_width);
+		ImGui::DragFloat("##hidelabel", &node.value, 0.01f, 0.0f, 1.0f);
+		ImGui::PopItemWidth();
+		ImNodes::EndInputAttribute();
+
+		ImNodes::BeginOutputAttribute(node.output);
+		ImGui::Indent(40);
+		ImGui::Text("output");
+		ImNodes::EndOutputAttribute();
+
+		ImNodes::EndNode();
+	}
 	// ImNodes::MiniMap();
 
 	// Drawing links between nodes

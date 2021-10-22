@@ -18,8 +18,18 @@ struct Link {
 	int beg, end;
 };
 
+struct UiNode {
+    int id;
+	
+	int input;
+	int output;
+
+    float value = 0.0f;
+};
+
 class NodeEditor {
 	map<int, Link> links; // change to map?
+	vector<UiNode> nodes;
 	int current_id = 0;
 public:
 	NodeEditor();
