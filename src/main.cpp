@@ -1,3 +1,5 @@
+// Tasks:
+// - Docking windows
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -72,6 +74,8 @@ int opengl_context(GLFWwindow* window) {
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	(void)io;
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	// io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 	NodeEditor node_editor;
 
 	ImGui::StyleColorsDark();
@@ -150,16 +154,18 @@ int opengl_context(GLFWwindow* window) {
 
 	int lastWindowSize[2] = {-1, -1};
 	ImGui::GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
-
+	
 	while (!glfwWindowShouldClose(window)) {
 		
 
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+
 
 		// ImGui::ShowDemoWindow(&show_demo);
-		ImGui::Begin("If i go crazy then will you still call me superman?");
+		ImGui::Begin("Teren");
 		// ImGui::Text("then will you still call me superman?");
 		// ImGui::SliderFloat("If i'm alive", &fparam, 0.0f, 100.0f);
 		ImVec2 pos = ImGui::GetWindowPos();
@@ -243,6 +249,13 @@ int opengl_context(GLFWwindow* window) {
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+		// Windows outside main window handling.
+		// if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+		// 	GLFWwindow* backup_current_context = glfwGetCurrentContext();
+		// 	ImGui::UpdatePlatformWindows();
+		// 	ImGui::RenderPlatformWindowsDefault();
+		// 	glfwMakeContextCurrent(backup_current_context);
+		// }
 
 		glfwSwapBuffers(window);
 		glfwWaitEvents();
