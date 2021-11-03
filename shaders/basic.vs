@@ -2,11 +2,14 @@
 
 in vec3 pos;
 out vec3 position;
+out vec2 texPos;
 out vec3 color;
 
 uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
+
+uniform sampler2D heightmap;
 
 float elevationFunc(vec2 pos) {
 	pos *= 1.0;
@@ -33,8 +36,15 @@ void main() {
 	//samples[0] = vec3(1.0, 0.0, 0.0);
 
 	position = pos;
+	texPos = position.xz;
+	texPos.x += 1.0;
+	texPos.x /= 2.0;
+	texPos.y += 1.0;
+	texPos.y /= 2.0;
+
 	float el = elevationFunc(pos.xz);
-	position.y = el;
+	position.y = texture(heightmap, texPos).r;
+
 
 	float minv = -0.5;
 	float maxv = 0.5;

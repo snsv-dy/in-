@@ -5,6 +5,9 @@ precision mediump float;
 out vec4 FragColor;
 in vec3 position;
 in vec3 color;
+in vec2 texPos;
+
+uniform sampler2D heightmap;
 
 float elevationFunc(vec2 pos);
 
@@ -16,19 +19,22 @@ vec3 getNorm(vec2 pos) {
 	float B = elevationFunc(pos - vec2(0.0, step));
 
 	return normalize(vec3(2.0 * (R - L), 2.0 * (B - T), -1.0));
+	//return texture(heightmap, pos / 2.0).r;
 }
 
 float elevationFunc(vec2 pos) {
-	pos *= 1.0;
-	float rd = 0.5;
+	//return 0.0;
+	return texture(heightmap, pos).r;
+	//pos *= 1.0;
+	//float rd = 0.5;
 	//return pos.x * pos.x;
-	return sin(pos.x) * cos(pos.y) * rd;
+	//return sin(pos.x) * cos(pos.y) * rd;
 }
 
 
 void main() {
 
-	vec3 sunPos = vec3(0.0, 2.0, -2.0);
+	vec3 sunPos = vec3(4.0, 4.0, 4.0);
 
 	vec3 samples[4];
 	samples[0] = vec3(1.0, 1.0, 0.0);
@@ -59,7 +65,11 @@ void main() {
 
 	vec3 col = color;
 
-	float diff = dot(getNorm(position.xz), normalize(sunPos));
+	//float diff = max(dot(getNorm(texPos), normalize(sunPos)), 0.0);
+	vec3 normal = getNorm(texPos);
+	normal = vec3(normal.x, -normal.z, normal.y);
+	vec3 lightDir = normalize(sunPos - vec3(texPos.x, texture(heightmap, texPos).r, texPos.y));
+	float diff = max(dot(normal, lightDir), 0.0);
 	col *= diff;
 	// col = vec3(1.0, abs(position.y), abs(position.z));
 

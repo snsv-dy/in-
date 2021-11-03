@@ -17,6 +17,10 @@
 #include <cstdio>
 
 #include <imnodes/imnodes.h>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 #include "NodeEditor.hpp"
 
 #include "Shader.hpp"
@@ -34,6 +38,7 @@ void error_callback(int error, const char* msg) {
 std::pair<unsigned int, unsigned int> createBufferForGridSize(unsigned int size);
 void setBufferData(unsigned int VAO, unsigned int VBO, float* data, unsigned int dataSize);
 void setFlatGrid(float* data, unsigned int size);
+unsigned int loadTexture(const std::string& filename, unsigned int& width, unsigned int& height);
 
 int main() {
 	GLFWwindow* window;
@@ -95,7 +100,7 @@ int opengl_context(GLFWwindow* window) {
 	const std::string vsPath = "shaders/basic.vs";
 	const std::string fsPath = "shaders/basic.fs";
 
-	const int gridSize = 20;
+	const int gridSize = 30;
 	auto [VAO, VBO] = createBufferForGridSize(gridSize);
 	const int gridTrigCount = (gridSize - 1) * (gridSize - 1) * 2;
 	const int gridDataSize = gridTrigCount * 3 * 3; // (3 vertices 3 parameters of each vertex (x, y, z))
@@ -120,7 +125,7 @@ int opengl_context(GLFWwindow* window) {
 	unsigned int fbTexture;
 	glGenTextures(1, &fbTexture);
 	glBindTexture(GL_TEXTURE_2D, fbTexture);
-	const unsigned int fb_size = 1000;
+	const unsigned int fb_size = 2000;
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, fb_size, fb_size, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -152,9 +157,17 @@ int opengl_context(GLFWwindow* window) {
 	unsigned int projectionLocation = glGetUniformLocation(shader.getProgram(), "projection");
 	unsigned int viewLocation = glGetUniformLocation(shader.getProgram(), "view");
 	unsigned int modelLocation = glGetUniformLocation(shader.getProgram(), "model");
+	// unsigned int heightLocation = glGetUniformLocation(shader.getProgram(), "heightmap");
 
 	int lastWindowSize[2] = {-1, -1};
 	ImGui::GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
+
+	unsigned int hdata_width, hdata_heigth, hdata_channels;
+	// unsigned char *tex_ptr = stbi_load("height.png", &hdata_width, &hdata_heigth, &hdata_channels, 0);
+	unsigned int heightmap_texture = loadTexture("height.png", hdata_width, hdata_heigth);
+	if (heightmap_texture == 0) {
+		printf("No heightmap!\n");
+	}
 
 	while (!glfwWindowShouldClose(window)) {
 		
@@ -213,6 +226,7 @@ int opengl_context(GLFWwindow* window) {
 		glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model));
+		glBindTexture(GL_TEXTURE_2D, heightmap_texture);
 
 		glBindVertexArray(VAO);
 		// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -306,6 +320,9 @@ void setBufferData(unsigned int VAO, unsigned int VBO, float* data, unsigned int
 	glBindVertexArray(0);
 }
 
+// void genTexture(void *data, const unsigned int width, const unsigned int height) {
+
+// }
 
 // Data must have at least (size * size * 3) length.
 void setFlatGrid(float* data, unsigned int size) {
@@ -350,4 +367,37 @@ void setFlatGrid(float* data, unsigned int size) {
 			index += 18;
 		}
 	}
+}
+
+
+unsigned int loadTexture(const std::string& filename, unsigned int& width, unsigned int& height) {
+	int w, h, channels;
+	
+	unsigned char *tex_ptr = stbi_load(filename.c_str(), &w, &h, &channels, 4);
+	
+	if(tex_ptr == NULL){
+		printf("Failed to load texture: \"%s\"!\n", filename);
+		
+		return 0;
+	}
+	
+	width = w;
+	height = h;
+
+	printf("loaded image with dimensions %d %d\n", width, height);
+	
+	unsigned int texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_ptr);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	
+	stbi_image_free(tex_ptr);
+	
+	return texture;
 }
