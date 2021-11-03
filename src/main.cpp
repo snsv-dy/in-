@@ -1,5 +1,6 @@
 // Tasks:
-// - Docking windows
+// - Docking windows (Done)
+// - Height value from texture
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -119,8 +120,8 @@ int opengl_context(GLFWwindow* window) {
 	unsigned int fbTexture;
 	glGenTextures(1, &fbTexture);
 	glBindTexture(GL_TEXTURE_2D, fbTexture);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 500, 500, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	const unsigned int fb_size = 1000;
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, fb_size, fb_size, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -129,7 +130,7 @@ int opengl_context(GLFWwindow* window) {
 	unsigned int rbo;
 	glGenRenderbuffers(1, &rbo);
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 500, 500);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, fb_size, fb_size);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
 
 	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
@@ -154,17 +155,15 @@ int opengl_context(GLFWwindow* window) {
 
 	int lastWindowSize[2] = {-1, -1};
 	ImGui::GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
-	
+
 	while (!glfwWindowShouldClose(window)) {
 		
 
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+		ImGuiID dock_id = ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 
-
-		// ImGui::ShowDemoWindow(&show_demo);
 		ImGui::Begin("Teren");
 		// ImGui::Text("then will you still call me superman?");
 		// ImGui::SliderFloat("If i'm alive", &fparam, 0.0f, 100.0f);
@@ -185,7 +184,7 @@ int opengl_context(GLFWwindow* window) {
 			ImVec2 delta = ImGui::GetMouseDragDelta();
 			const float mouseSensitivity = 0.5;
 			cameraRotation.x -= delta.x * mouseSensitivity;
-			cameraRotation.y -= delta.y * mouseSensitivity;
+			cameraRotation.y += delta.y * mouseSensitivity;
 			if (cameraRotation.y <= -89.9f) {
 				cameraRotation.y = -89.9f;
 			} else if (cameraRotation.y >= 89.9f) {
@@ -205,7 +204,7 @@ int opengl_context(GLFWwindow* window) {
 		// 3d drawing
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 		glEnable(GL_DEPTH_TEST);
-		glViewport(0, 0, 500, 500);
+		glViewport(0, 0, fb_size, fb_size);
 
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -224,8 +223,7 @@ int opengl_context(GLFWwindow* window) {
 		// 3d drawing end
 		//
 
-		ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)fbTexture, ImVec2(pos.x, pos.y), ImVec2(pos.x + size.x, pos.y + size.y));
-		// ImGui::Image((void *)(intptr_t)fbTexture, ImVec2(300, 300));
+		ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)fbTexture, ImVec2(pos.x, pos.y), ImVec2(pos.x + size.x, pos.y + size.y), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
 		ImGui::End();
 
 		ImGui::Begin("Paramz");
@@ -233,6 +231,10 @@ int opengl_context(GLFWwindow* window) {
 		ImGui::Text("size: %f %f", size.x, size.y);
 		ImGui::Checkbox("keyCtrl", &ImGui::GetIO().KeyCtrl);
 		ImGui::Text("Links size: %d\n", node_editor.getLinksSize());
+		ImGui::Text("Camera rotation: %d\n", node_editor.getLinksSize());
+		ImGui::Text("cameraRotation: %2.2f %2.2f\n", cameraRotation.x, cameraRotation.y);
+		ImGui::Text("cameraOrigin: %2.2f %2.2f %2.2f\n", cameraOrigin.x, cameraOrigin.y, cameraOrigin.z);
+		ImGui::Text("cameraUp: %2.2f %2.2f %2.2f\n", cameraUp.x, cameraUp.y, cameraUp.z);
 		ImGui::End();
 
 		//

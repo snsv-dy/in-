@@ -19,9 +19,10 @@ vec3 getNorm(vec2 pos) {
 }
 
 float elevationFunc(vec2 pos) {
-	pos *= 4.0;
+	pos *= 1.0;
 	float rd = 0.5;
-	return sin(pos.x) * cos(pos.y) * rd + 0.5;
+	//return pos.x * pos.x;
+	return sin(pos.x) * cos(pos.y) * rd;
 }
 
 

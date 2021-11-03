@@ -9,9 +9,10 @@ uniform mat4 view;
 uniform mat4 model;
 
 float elevationFunc(vec2 pos) {
-	pos *= 4.0;
+	pos *= 1.0;
 	float rd = 0.5;
-	return sin(pos.x) * cos(pos.y) * rd + 0.5;
+	//return pos.x * pos.x;
+	return sin(pos.x) * cos(pos.y) * rd;
 }
 
 float remap( float minval, float maxval, float curval )
@@ -21,26 +22,33 @@ float remap( float minval, float maxval, float curval )
 
 void main() {
 	vec3 samples[4];
-	//samples[0] = vec3(0.0, 0.0, 1.0);
-	//samples[1] = vec3(0.0, 1.0, 0.0);
-	//samples[2] = vec3(1.0, 1.0, 0.0);
-	//samples[3] = vec3(1.0, 0.0, 0.0);
+	samples[0] = vec3(0.0, 0.0, 1.0);
+	samples[1] = vec3(0.0, 1.0, 0.0);
+	samples[2] = vec3(1.0, 1.0, 0.0);
+	samples[3] = vec3(1.0, 0.0, 0.0);
 
-	samples[3] = vec3(0.0, 0.0, 1.0);
-	samples[2] = vec3(0.0, 1.0, 0.0);
-	samples[1] = vec3(1.0, 1.0, 0.0);
-	samples[0] = vec3(1.0, 0.0, 0.0);
+	//samples[3] = vec3(0.0, 0.0, 1.0);
+	//samples[2] = vec3(0.0, 1.0, 0.0);
+	//samples[1] = vec3(1.0, 1.0, 0.0);
+	//samples[0] = vec3(1.0, 0.0, 0.0);
 
 	position = pos;
-	position.y = elevationFunc(pos.xz);
+	float el = elevationFunc(pos.xz);
+	position.y = el;
 
-	if (position.y > 0 && position.y < 0.3) {
-		color = mix(samples[0], samples[1], remap(0.0, 0.3, position.y));
-	} else if (position.y >= 0.3 && position.y < 0.6) {
-		color = mix(samples[1], samples[2], remap(0.3, 0.6, position.y));
+	float minv = -0.5;
+	float maxv = 0.5;
+	float range = maxv - minv;
+	int steps = 4;
+	float stepv = range / (steps - 1);
+
+	if (position.y > minv + 0.0 * stepv && position.y < minv + 1.0 * stepv) {
+		color = mix(samples[0], samples[1], remap(minv + 0.0 * stepv, minv + 1.0 * stepv, position.y));
+	} else if (position.y >= minv + 1.0 * stepv && position.y < minv + 2.0 * stepv) {
+		color = mix(samples[1], samples[2], remap(minv + 1.0 * stepv, minv + 2.0 * stepv, position.y));
 	} else {
-		color = mix(samples[2], samples[3], remap(0.6, 1.0, position.y));
+		color = mix(samples[2], samples[3], remap(minv + 2.0 * stepv, minv + 3.0 * stepv, position.y));
 	}
 
-	gl_Position = projection * view * model * vec4(position, 1.0);
+	gl_Position = projection * view * model * vec4(position.xyz, 1.0);
 }
