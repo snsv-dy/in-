@@ -73,5 +73,5 @@ void main() {
 	col *= diff;
 	// col = vec3(1.0, abs(position.y), abs(position.z));
 
-	FragColor = vec4(col, 1.0);
+	FragColor = vec4(vec3(1.0, 1.0, 1.0) * diff, 1.0);
 }

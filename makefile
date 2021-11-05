@@ -7,7 +7,7 @@ OBJ_DIR = bin
 VPATH = include/glad include/imnodes src
 
 EXECUTABLE = prog
-SRC = main.cpp include/glad/glad.c Shader.cpp NodeEditor.cpp
+SRC = main.cpp include/glad/glad.c Shader.cpp NodeEditor.cpp 
 SRC += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/backends/imgui_impl_glfw.cpp $(IMGUI_DIR)/backends/imgui_impl_opengl3.cpp
 SRC += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
 SRC += include/imnodes/imnodes.cpp

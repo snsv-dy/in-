@@ -22,8 +22,8 @@
 #include <stb_image.h>
 
 #include "NodeEditor.hpp"
-
 #include "Shader.hpp"
+#include "DynamcTexture.hpp"
 
 int screen_width = 1200;
 int screen_height = 1000;
@@ -169,6 +169,10 @@ int opengl_context(GLFWwindow* window) {
 		printf("No heightmap!\n");
 	}
 
+	int dw = 512;
+	DynamcTexture dynamc(dw, dw);
+	dynamc.gen();
+
 	while (!glfwWindowShouldClose(window)) {
 		
 
@@ -226,7 +230,8 @@ int opengl_context(GLFWwindow* window) {
 		glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model));
-		glBindTexture(GL_TEXTURE_2D, heightmap_texture);
+		// glBindTexture(GL_TEXTURE_2D, heightmap_texture);
+		glBindTexture(GL_TEXTURE_2D, dynamc.texture);
 
 		glBindVertexArray(VAO);
 		// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -249,6 +254,9 @@ int opengl_context(GLFWwindow* window) {
 		ImGui::Text("cameraRotation: %2.2f %2.2f\n", cameraRotation.x, cameraRotation.y);
 		ImGui::Text("cameraOrigin: %2.2f %2.2f %2.2f\n", cameraOrigin.x, cameraOrigin.y, cameraOrigin.z);
 		ImGui::Text("cameraUp: %2.2f %2.2f %2.2f\n", cameraUp.x, cameraUp.y, cameraUp.z);
+		if (ImGui::SliderFloat("Divider", &dynamc.divider, 0.0f, 1000.0f)) {
+			dynamc.gen();
+		}
 		ImGui::End();
 
 		//
