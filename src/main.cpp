@@ -25,6 +25,7 @@
 #include "Shader.hpp"
 #include "DynamcTexture.hpp"
 #include "SinGen.hpp"
+#include "GradGen.hpp"
 
 int screen_width = 1200;
 int screen_height = 1000;
@@ -174,7 +175,9 @@ int opengl_context(GLFWwindow* window) {
 	DynamcTexture dynamc(dw, dw);
 	// dynamc.gen();
 
-	SinGenerator sigen(&dynamc, dw, dw);
+	// SinGenerator sigen(&dynamc, dw, dw);
+	GradGenerator sigen(&dynamc, dw, dw);
+	sigen.gen();
 
 	while (!glfwWindowShouldClose(window)) {
 		
