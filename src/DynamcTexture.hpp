@@ -3,10 +3,12 @@
 
 class DynamcTexture {
 	int width, height;
-	float* data;
 public:
+	float* data;
 	unsigned int texture;
-	float divider = 100.0f;
+	float divider = 10.0f;
+
+	// void (*generator)(float*, int, int);
 	// Grayscale
 	DynamcTexture(const int width, const int height): width{width}, height{height}, data{nullptr} {
 		data = new float[width * height];
@@ -31,7 +33,7 @@ public:
 			for (int x = 0; x < height; x++) {
 				float fx = (float)x / divider;
 				float fy = (float)y / divider;
-				data[yw + x] = (sinf(fx + fy) + 1.0f) / 2.0f;
+				data[yw + x] = (sinf(fx) + cosf(fy) + 2.0f) / 4.0f;
 			}
 		}
 
@@ -39,6 +41,7 @@ public:
 	}
 
 	~DynamcTexture() {
+		glDeleteTextures(1, &texture);
 		delete[] data;
 	}
 };

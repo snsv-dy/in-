@@ -24,6 +24,7 @@
 #include "NodeEditor.hpp"
 #include "Shader.hpp"
 #include "DynamcTexture.hpp"
+#include "SinGen.hpp"
 
 int screen_width = 1200;
 int screen_height = 1000;
@@ -171,7 +172,9 @@ int opengl_context(GLFWwindow* window) {
 
 	int dw = 512;
 	DynamcTexture dynamc(dw, dw);
-	dynamc.gen();
+	// dynamc.gen();
+
+	SinGenerator sigen(&dynamc, dw, dw);
 
 	while (!glfwWindowShouldClose(window)) {
 		
@@ -254,9 +257,10 @@ int opengl_context(GLFWwindow* window) {
 		ImGui::Text("cameraRotation: %2.2f %2.2f\n", cameraRotation.x, cameraRotation.y);
 		ImGui::Text("cameraOrigin: %2.2f %2.2f %2.2f\n", cameraOrigin.x, cameraOrigin.y, cameraOrigin.z);
 		ImGui::Text("cameraUp: %2.2f %2.2f %2.2f\n", cameraUp.x, cameraUp.y, cameraUp.z);
-		if (ImGui::SliderFloat("Divider", &dynamc.divider, 0.0f, 1000.0f)) {
-			dynamc.gen();
-		}
+		// if (ImGui::SliderFloat("Divider", &dynamc.divider, 0.0f, 300.0f)) {
+		// 	dynamc.gen();
+		// }
+		sigen.drawGui();
 		ImGui::End();
 
 		//
@@ -265,6 +269,10 @@ int opengl_context(GLFWwindow* window) {
 		//
 		//
 
+		ImGui::End();
+
+		ImGui::Begin("eh");
+		ImGui::Image((void *)dynamc.texture, ImVec2(512, 512));
 		ImGui::End();
 		
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
