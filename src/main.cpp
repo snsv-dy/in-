@@ -102,7 +102,7 @@ int opengl_context(GLFWwindow* window) {
 	const std::string vsPath = "shaders/basic.vs";
 	const std::string fsPath = "shaders/basic.fs";
 
-	const int gridSize = 30;
+	const int gridSize = 100;
 	auto [VAO, VBO] = createBufferForGridSize(gridSize);
 	const int gridTrigCount = (gridSize - 1) * (gridSize - 1) * 2;
 	const int gridDataSize = gridTrigCount * 3 * 3; // (3 vertices 3 parameters of each vertex (x, y, z))
@@ -176,8 +176,10 @@ int opengl_context(GLFWwindow* window) {
 	// dynamc.gen();
 
 	// SinGenerator sigen(&dynamc, dw, dw);
-	GradGenerator sigen(&dynamc, dw, dw);
-	sigen.gen();
+	// GradGenerator sigen(&dynamc, dw, dw);
+	// sigen.gen();
+	
+	ImGui::GetStyle().ScaleAllSizes(1.5f);
 
 	while (!glfwWindowShouldClose(window)) {
 		
@@ -186,6 +188,11 @@ int opengl_context(GLFWwindow* window) {
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 		ImGuiID dock_id = ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+		
+		UiNode* activeNode = nullptr;
+		if (node_editor.selectedNode != nullptr) {
+			activeNode = node_editor.selectedNode.get();
+		}
 
 		ImGui::Begin("Teren");
 		// ImGui::Text("then will you still call me superman?");
@@ -237,7 +244,11 @@ int opengl_context(GLFWwindow* window) {
 		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model));
 		// glBindTexture(GL_TEXTURE_2D, heightmap_texture);
-		glBindTexture(GL_TEXTURE_2D, dynamc.texture);
+		if (activeNode != nullptr) {
+			glBindTexture(GL_TEXTURE_2D, activeNode->dynamc.texture);
+		} else {
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
 
 		glBindVertexArray(VAO);
 		// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -263,7 +274,11 @@ int opengl_context(GLFWwindow* window) {
 		// if (ImGui::SliderFloat("Divider", &dynamc.divider, 0.0f, 300.0f)) {
 		// 	dynamc.gen();
 		// }
-		sigen.drawGui();
+		// sigen.drawGui();
+		if (activeNode != nullptr) {
+			activeNode->generator->drawGui();
+		}
+
 		ImGui::End();
 
 		//
@@ -275,7 +290,9 @@ int opengl_context(GLFWwindow* window) {
 		ImGui::End();
 
 		ImGui::Begin("eh");
-		ImGui::Image((void *)dynamc.texture, ImVec2(512, 512));
+		if (activeNode != nullptr) {
+			ImGui::Image((void *)activeNode->dynamc.texture, ImVec2(512, 512));
+		}
 		ImGui::End();
 		
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);

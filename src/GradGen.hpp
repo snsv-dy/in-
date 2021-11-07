@@ -7,29 +7,19 @@
 #include "DynamcTexture.hpp"
 #include "Generator.hpp"
 
-float distance(float x1, float y1, float x2, float y2) {
-	float dx = (x2 - x1);
-	float dy = (y2 - y1);
-	return sqrt(dx * dx + dy * dy);
-}
-
 class GradGenerator : public Generator {
 	float amp = 1.0f;
 	float radius = 100.0f;
 	float xtranslation = 0.0f;
 	float ytranslation = 0.0f;
 
-	int width = 512;
-	int height = width;
+	// int width = 512;
+	// int height = width;
 
-	float fw = 0.0f;
-	float fh = 0.0f;
-
-	DynamcTexture *dynamc;
+	// DynamcTexture *dynamc;
 public:
-	GradGenerator(DynamcTexture *dynamc, int width, int height): dynamc{dynamc}, width{width}, height{height} {
-		fw = (float)width;
-		fh = (float)height;
+	GradGenerator() {
+
 	}
 
 	void drawGui() {
@@ -43,28 +33,36 @@ public:
 			gen();
 		}
 	}
+	
+	float distance(float x1, float y1, float x2, float y2) {
+		float dx = (x2 - x1);
+		float dy = (y2 - y1);
+		return sqrt(dx * dx + dy * dy);
+	}
 
 	void gen() {
-		float maxDist = radius;
-		for (int y = 0; y < height; y++) {
-			int yw = y * width;
-			// float value = sinf(fy / period + xtranslation) * amplitude + ytranslation;
+		if (dynamc != nullptr) {
+			float maxDist = radius;
+			for (int y = 0; y < height; y++) {
+				int yw = y * width;
+				// float value = sinf(fy / period + xtranslation) * amplitude + ytranslation;
 
-			for (int x = 0; x < height; x++) {
-				// float fy = (float)y - fh / 2.0f;
-				// float fx = (float)x - fw / 2.0f;
-				float fy = (float)y - fh / 2.0f;
-				float fx = (float)x - fw / 2.0f;
-				float DistFromCenter = fmin(distance(xtranslation, ytranslation, fx, fy) / maxDist, amp);
-				dynamc->data[yw + x] =  amp - DistFromCenter;
+				for (int x = 0; x < height; x++) {
+					// float fy = (float)y - fh / 2.0f;
+					// float fx = (float)x - fw / 2.0f;
+					float fy = (float)y - fh / 2.0f;
+					float fx = (float)x - fw / 2.0f;
+					float DistFromCenter = fmin(distance(xtranslation, ytranslation, fx, fy) / maxDist, amp);
+					dynamc->data[yw + x] =  amp - DistFromCenter;
+				}
 			}
+			dynamc->updateGL();
 		}
-		dynamc->updateGL();
 	}
 
-	unsigned int& getTexture() {
-		return dynamc->texture;
-	}
+	// unsigned int& getTexture() {
+	// 	return dynamc->texture;
+	// }
 };
 
 #endif

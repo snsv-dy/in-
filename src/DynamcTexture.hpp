@@ -1,9 +1,11 @@
 #ifndef _DYNAMC_TEXTURE_HPP_
 #define _DYNAMC_TEXTURE_HPP_
 
+#include <glad/glad.h>
+
 class DynamcTexture {
-	int width, height;
 public:
+	int width, height;
 	float* data;
 	unsigned int texture;
 	float divider = 10.0f;
@@ -28,14 +30,14 @@ public:
 	}
 
 	void gen() {
-		for (int y = 0; y < height; y++) {
-			int yw = y * width;
-			for (int x = 0; x < height; x++) {
-				float fx = (float)x / divider;
-				float fy = (float)y / divider;
-				data[yw + x] = (sinf(fx) + cosf(fy) + 2.0f) / 4.0f;
-			}
-		}
+		// for (int y = 0; y < height; y++) {
+		// 	int yw = y * width;
+		// 	for (int x = 0; x < height; x++) {
+		// 		float fx = (float)x / divider;
+		// 		float fy = (float)y / divider;
+		// 		data[yw + x] = (sinf(fx) + cosf(fy) + 2.0f) / 4.0f;
+		// 	}
+		// }
 
 		updateGL();
 	}

@@ -1,5 +1,5 @@
 
-.PHONY = all
+.PHONY = all clean
 
 IMGUI_DIR = ../imgui
 OBJ_DIR = bin
@@ -23,6 +23,9 @@ LFLAGS = -L. -lGL -ldl -lglfw3 -lX11 -lXxf86vm -lXrandr -lpthread
 
 all: $(OBJ_DIR)/$(EXECUTABLE)
 	@echo eh
+
+clean:
+	rm bin/main.o bin/Shader.o bin/NodeEditor.o bin/prog
 
 $(OBJ_DIR)/%.o:%.cpp
 	$(CC) $(CCFLAGS) -c -o $@ $<
