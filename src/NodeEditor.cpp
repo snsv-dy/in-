@@ -54,18 +54,31 @@ void NodeEditor::draw() {
 			addNode = true;
 			type = 1;
 		} 
+		
+		if (ImGui::MenuItem("Combine")) {
+			addNode = true;
+			type = 2;
+		} 
 
 		if (addNode) {
 			unique_ptr<Generator> generator;
 			switch (type) {
 				case 0: generator = make_unique<SinGenerator>(); break;
 				case 1: generator = make_unique<GradGenerator>(); break;
+				case 2: generator = make_unique<CombinerGenerator>(); break;
 			}
 
 			shared_ptr<UiNode> node = make_shared<UiNode>(move(generator));
 			node->id = ++current_id;
-			node->input = ++current_id;
-			node->output = ++current_id;
+			if (type == 2) {
+				node->inputs.push_back(++current_id);
+				node->inputs.push_back(++current_id);
+			}
+
+			node->outputs.push_back(++current_id);
+			// node->input = ++current_id;
+			// node->input2 = ++current_id;
+			// node->output = ++current_id;
 
 			nodes.push_back(node);
 
@@ -90,27 +103,7 @@ void NodeEditor::draw() {
 	const float node_width = 100.0f;
 	for (shared_ptr<UiNode>& node : nodes) {
 	// for (map<int, UiNode>::iterator it = nodes.begin(); it != nodes.end(); it++) {
-		ImNodes::BeginNode(node->id);
-
-		ImNodes::BeginNodeTitleBar();
-		// string 
-		ImGui::Text("Node %d", node->id);
-		ImNodes::EndNodeTitleBar();
-
-		ImNodes::BeginInputAttribute(node->input);
-		// ImGui::Text("input");
-		// ImGui::SameLine();
-		ImGui::PushItemWidth(node_width);
-		ImGui::DragFloat("##hidelabel", &node->value, 0.01f, 0.0f, 1.0f);
-		ImGui::PopItemWidth();
-		ImNodes::EndInputAttribute();
-
-		ImNodes::BeginOutputAttribute(node->output);
-		ImGui::Indent(40);
-		ImGui::Text("output");
-		ImNodes::EndOutputAttribute();
-
-		ImNodes::EndNode();
+		node->draw();
 	}
 	// ImNodes::MiniMap();
 
@@ -123,10 +116,35 @@ void NodeEditor::draw() {
 
 	int beg, end;
 	if (ImNodes::IsLinkCreated(&beg, &end)) {
-		int link_id = current_id++;
-		links[link_id] = {link_id, beg, end};
+		shared_ptr<UiNode> beg_node = nullptr;
+		shared_ptr<UiNode> end_node = nullptr;
+		int nodesGot = 0;
 
-		printf("link! %d %d\n", beg, end);
+
+		printf("attempt %d %d\n", beg, end);
+
+		for (shared_ptr<UiNode>& node : nodes) {
+			if (node->hasOutput(beg)) {
+				beg_node = node;
+				nodesGot++;
+				printf("got output: %d\n", node->id);
+			} else if(node->hasInput(end)) {
+				end_node = node;
+				nodesGot++;
+				printf("got input: %d\n", node->id);
+			}
+		}
+
+		printf("Nodes got: %d\n", nodesGot);
+
+		if (nodesGot == 2) {
+			end_node->giveInput(end, &beg_node->dynamc);
+
+			int link_id = current_id++;
+			links[link_id] = {link_id, beg, end};
+
+			printf("link! %d %d\n", beg, end);
+		}
 	}
 
 	int destroyId;

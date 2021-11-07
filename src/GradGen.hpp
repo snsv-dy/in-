@@ -60,9 +60,9 @@ public:
 		}
 	}
 
-	// unsigned int& getTexture() {
-	// 	return dynamc->texture;
-	// }
+	const char* getName() {
+		return "Grad";
+	}
 };
 
 #endif

@@ -8,7 +8,7 @@ protected:
 	DynamcTexture* dynamc = nullptr;
 	float fw = 0.0f;
 	float fh = 0.0f;
-	
+
 	int width = 512;
 	int height = width;
 public:
@@ -27,6 +27,12 @@ public:
 	virtual unsigned int& getTexture() {
 		return dynamc->texture;
 	}
+
+	virtual const char* getName() =0;
+	virtual bool hasInput() { return false; }
+	virtual bool setInput(int index, DynamcTexture* dynamc) { return false; }
+	virtual bool unsetInput(int index)  { return false; }
+
 	virtual ~Generator() {}
 };
 
