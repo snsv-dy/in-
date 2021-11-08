@@ -31,7 +31,7 @@ public:
 	virtual const char* getName() =0;
 	virtual bool hasInput() { return false; }
 	virtual bool setInput(int index, DynamcTexture* dynamc) { return false; }
-	virtual bool unsetInput(int index)  { return false; }
+	virtual bool unsetInput(int index) { return false; }
 
 	virtual ~Generator() {}
 };

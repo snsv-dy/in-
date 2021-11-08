@@ -108,8 +108,9 @@ void NodeEditor::draw() {
 	// ImNodes::MiniMap();
 
 	// Drawing links between nodes
-	for (const auto& [id, link] : links) {
-		ImNodes::Link(id, link.beg, link.end);
+	int link_i = 0;
+	for (const auto& link : links) {
+		ImNodes::Link(link_i++, link.beg, link.end);
 	}
 
 	ImNodes::EndNodeEditor();
@@ -140,16 +141,42 @@ void NodeEditor::draw() {
 		if (nodesGot == 2) {
 			end_node->giveInput(end, &beg_node->dynamc);
 
-			int link_id = current_id++;
-			links[link_id] = {link_id, beg, end};
+			links.push_back({-1, beg, end});
 
-			printf("link! %d %d\n", beg, end);
+			printf("link[%d]! %d %d\n", links.size() - 1, beg, end);
 		}
 	}
 
 	int destroyId;
 	if (ImNodes::IsLinkDestroyed(&destroyId)) {
-		links.erase(destroyId);
+		printf("Link id: %d\n");
+		Link& link = links[destroyId];
+
+		shared_ptr<UiNode> beg_node = nullptr;
+		shared_ptr<UiNode> end_node = nullptr;
+		int nodesGot = 0;
+
+		printf("removing %d %d\n", link.beg, link.end);
+
+		for (shared_ptr<UiNode>& node : nodes) {
+			if (node->hasOutput(link.beg)) {
+				beg_node = node;
+				nodesGot++;
+				printf("got output: %d\n", node->id);
+			} else if(node->hasInput(link.end)) {
+				end_node = node;
+				nodesGot++;
+				printf("got input: %d\n", node->id);
+			}
+		}
+
+		if (nodesGot == 2) {
+			if (end_node->unsetInput(link.end)) {
+				links.erase(links.begin() + destroyId);
+			} else {
+				printf("Could not unset node\n");
+			}
+		}
 	}
 
 	// Check for node selecting

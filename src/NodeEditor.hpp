@@ -22,7 +22,9 @@ using namespace std;
 
 struct Link {
 	int id;
-	int beg, end;
+	int beg;
+	int end;
+	// Link(int id, int beg, int end)
 };
 
 struct UiNode {
@@ -124,10 +126,24 @@ struct UiNode {
 
 		return generator->setInput(input_index, dynamc);
 	}
+
+	bool unsetInput(int id) {
+		int input_index = 0;
+		for (const int& inp : inputs) {
+			if (id == inp) {
+				break;
+			}
+			input_index++;
+		}
+
+		// printf("unsetting index: %d\n", input_index);
+
+		return generator->unsetInput(input_index);
+	}
 };
 
 class NodeEditor {
-	map<int, Link> links; // change to map?
+	vector<Link> links; // change to list?
 	vector<shared_ptr<UiNode>> nodes;
 	int current_id = 0;
 public:
