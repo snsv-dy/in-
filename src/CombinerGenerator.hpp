@@ -3,6 +3,13 @@
 
 #include "Generator.hpp"
 
+enum class CombineFunctions {
+	ADD,
+	SUBTRACT,
+	MULTIPLY,
+	DIVIDE
+};
+
 class CombinerGenerator : public Generator {
 public:
 	DynamcTexture* input1 = nullptr;
@@ -19,8 +26,27 @@ public:
 	// 	which == 0 ? input1 = nullptr : input2 = nullptr;
 	// }
 
+	CombineFunctions func = CombineFunctions::ADD;
+
 	void drawGui() {
 		ImGui::Text("Sup.\n");
+
+		if (ImGui::RadioButton("Add", func == CombineFunctions::ADD)) {
+			func = CombineFunctions::ADD;
+		} 
+		
+		if (ImGui::RadioButton("Subtract", func == CombineFunctions::SUBTRACT)) {
+			func = CombineFunctions::SUBTRACT;
+		}
+
+		if (ImGui::RadioButton("Multiply", func == CombineFunctions::MULTIPLY)) {
+			func = CombineFunctions::MULTIPLY;
+		}
+
+		if (ImGui::RadioButton("Divide", func == CombineFunctions::DIVIDE)) {
+			func = CombineFunctions::DIVIDE;
+		}
+
 		if (ImGui::Button("generate")) {
 			gen();
 		}
@@ -78,7 +104,7 @@ private:
 			int yw = y * width;
 			for (int x = 0; x < height; x++) {
 				int index = yw + x;
-				
+
 				dynamc->data[index] = input->data[index];
 			}
 		}
@@ -89,7 +115,22 @@ private:
 			int yw = y * width;
 			for (int x = 0; x < height; x++) {
 				int index = yw + x;
-				float out = input1->data[index] + input2->data[index];
+				float &val1 = input1->data[index];
+				float &val2 = input2->data[index];
+				float out;
+				switch (func) {
+					case CombineFunctions::SUBTRACT:
+						out = val1 - val2;
+						break;
+					case CombineFunctions::MULTIPLY:
+						out = val1 * val2;
+						break;
+					case CombineFunctions::DIVIDE:
+						out = val1 / val2;
+						break;
+					default:
+						out = val1 + val2;
+				}
 
 				dynamc->data[index] = out;
 			}
