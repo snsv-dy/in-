@@ -151,6 +151,7 @@ int opengl_context(GLFWwindow* window) {
 	glm::mat4 projection = glm::perspective(glm::radians(55.0f), 1.0f, 0.1f, 1000.0f);
 	glm::vec2 cameraRotation = glm::vec2(0.0f);
 	glm::vec3 cameraOrigin = glm::vec3(0.0f, 0.0f, -4.0f);
+	const float cameraScrollSpeed = 0.1f;
 	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 	glm::mat4 view = glm::lookAt(cameraOrigin, -cameraOrigin, cameraUp);
 	// glm::mat4 model = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(1.0f, 0.5f, 0.0f));
@@ -210,6 +211,7 @@ int opengl_context(GLFWwindow* window) {
 
 		//
 		// Model rotation
+		bool cameraMoved = false;
 		if(ImGui::IsWindowFocused() && ImGui::IsMouseDragging(0)) {
 			ImVec2 delta = ImGui::GetMouseDragDelta();
 			const float mouseSensitivity = 0.5;
@@ -220,12 +222,27 @@ int opengl_context(GLFWwindow* window) {
 			} else if (cameraRotation.y >= 89.9f) {
 				cameraRotation.y = 89.9f;
 			}
+			ImGui::ResetMouseDragDelta();
 
+			cameraMoved = true;
+		}
+
+		float& scrolled_amount = ImGui::GetIO().MouseWheel;
+		if (ImGui::IsWindowHovered() && scrolled_amount != 0.0f) {
+			// printf("scrolled: %2.2f\n", scrolled_amount);
+			float cameraOffset = scrolled_amount * cameraScrollSpeed;
+			if (cameraOrigin.z + cameraOffset <= 0.0f) {
+				cameraOrigin.z += cameraOffset;
+			}
+
+			cameraMoved = true;
+		}
+
+		if (cameraMoved) {
 			glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraRotation.x), glm::vec3(0.0f, 1.0f, 0.0f));
 			rotationMatrix = glm::rotate(rotationMatrix, glm::radians(cameraRotation.y), glm::vec3(1.0f, 0.0f, 0.0f));
 			glm::vec3 cameraPos = glm::vec3(rotationMatrix * glm::vec4(cameraOrigin, 1.0f));
 			view = glm::lookAt(cameraPos, -cameraPos, cameraUp);
-			ImGui::ResetMouseDragDelta();
 		}
 		//
 		//
