@@ -155,7 +155,7 @@ int opengl_context(GLFWwindow* window) {
 	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 	glm::mat4 view = glm::lookAt(cameraOrigin, -cameraOrigin, cameraUp);
 	// glm::mat4 model = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(1.0f, 0.5f, 0.0f));
-	glm::mat4 model = glm::mat4(1.0f);
+	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.5f, 0.0f)); // Moved model 0.5 down, so that model will be centered in preview.
 
 	unsigned int projectionLocation = glGetUniformLocation(shader.getProgram(), "projection");
 	unsigned int viewLocation = glGetUniformLocation(shader.getProgram(), "view");

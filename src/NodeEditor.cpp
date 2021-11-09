@@ -138,9 +138,8 @@ void NodeEditor::draw() {
 
 		printf("Nodes got: %d\n", nodesGot);
 
-		if (nodesGot == 2) {
-			end_node->giveInput(end, &beg_node->dynamc);
-
+		if (nodesGot == 2 && end_node->giveInput(end, &beg_node->dynamc)) {
+			
 			links.push_back({-1, beg, end});
 
 			printf("link[%d]! %d %d\n", links.size() - 1, beg, end);
