@@ -45,6 +45,8 @@ void NodeEditor::draw() {
 
 		bool addNode = false;
 		int type = 0;
+		ImU32 color = NODE_COLOR_DEFAULT;
+		ImU32 colorSelected = NODE_COLOR_DEFAULT_SELECTED;
 
 		if (ImGui::MenuItem("Sin")) {
 			addNode = true;
@@ -58,6 +60,8 @@ void NodeEditor::draw() {
 		if (ImGui::MenuItem("Combine")) {
 			addNode = true;
 			type = 2;
+			color = NODE_COLOR_GREEN;
+			colorSelected = NODE_COLOR_GREEN_SELECTED;
 		} 
 
 		if (addNode) {
@@ -76,9 +80,7 @@ void NodeEditor::draw() {
 			}
 
 			node->outputs.push_back(++current_id);
-			// node->input = ++current_id;
-			// node->input2 = ++current_id;
-			// node->output = ++current_id;
+			node->setColors(color, colorSelected);
 
 			nodes.push_back(node);
 
@@ -139,7 +141,6 @@ void NodeEditor::draw() {
 		printf("Nodes got: %d\n", nodesGot);
 
 		if (nodesGot == 2 && end_node->giveInput(end, &beg_node->dynamc)) {
-			
 			links.push_back({-1, beg, end});
 
 			printf("link[%d]! %d %d\n", links.size() - 1, beg, end);

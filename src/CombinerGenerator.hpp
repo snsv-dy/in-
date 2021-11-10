@@ -132,6 +132,8 @@ private:
 						out = val1 + val2;
 				}
 
+				out = fmin(out, 1.0f);
+
 				dynamc->data[index] = out;
 			}
 		}

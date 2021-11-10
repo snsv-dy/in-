@@ -5,7 +5,7 @@
 #include <vector>
 #include <map>
 #include <memory>
-#include "imgui.h"
+#include <imgui.h>
 #include <imnodes/imnodes.h>
 
 #include "DynamcTexture.hpp"
@@ -27,6 +27,12 @@ struct Link {
 	// Link(int id, int beg, int end)
 };
 
+// Node titlebar colors
+const ImU32 NODE_COLOR_DEFAULT = IM_COL32(11, 109, 191, 255);
+const ImU32 NODE_COLOR_DEFAULT_SELECTED = IM_COL32(81, 148, 204, 255);
+const ImU32 NODE_COLOR_GREEN = IM_COL32(11, 191, 109, 255);
+const ImU32 NODE_COLOR_GREEN_SELECTED = IM_COL32(81, 204, 148, 255);
+
 struct UiNode {
     int id;
 	
@@ -40,6 +46,9 @@ struct UiNode {
 	DynamcTexture dynamc;
 	unique_ptr<Generator> generator;
 
+	ImU32 color = IM_COL32(11, 109, 191, 255);
+	ImU32 colorSelected = IM_COL32(81, 148, 204, 255);
+
 	UiNode(unique_ptr<Generator> generator): dynamc{texWidth, texWidth}, generator{move(generator)} {
 	// generator{make_unique<SinGenerator>(&dynamc, texWidth, texWidth)} {
 		this->generator->setTexture(&dynamc);
@@ -47,8 +56,16 @@ struct UiNode {
 		this->generator->gen();
 	}
 
+	void setColors(ImU32 color = IM_COL32(11, 109, 191, 255), ImU32 colorSelected = IM_COL32(81, 148, 204, 255)) {
+		this->color = color;
+		this->colorSelected = colorSelected;
+	}
+
 	void draw() {
 		const float node_width = 100.0f;
+		ImNodes::PushColorStyle(ImNodesCol_TitleBar, color);
+		ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected, colorSelected);
+		ImNodes::PushColorStyle(ImNodesCol_TitleBarHovered, colorSelected);
 
 		ImNodes::BeginNode(id);
 
@@ -93,6 +110,10 @@ struct UiNode {
 		}
 
 		ImNodes::EndNode();
+		
+		ImNodes::PopColorStyle();
+		ImNodes::PopColorStyle();
+		ImNodes::PopColorStyle();
 	}
 
 	bool hasInput(int id) {

@@ -20,7 +20,7 @@ public:
 
 	void drawGui() {
 		bool changed = false;
-		changed |= ImGui::DragFloat("Amplitude", &amplitude, 0.1f);
+		changed |= ImGui::DragFloat("Amplitude", &amplitude, 0.01f);
 		changed |= ImGui::DragFloat("Period", &period, 0.1f);
 		changed |= ImGui::DragFloat("xranslation", &xtranslation, 0.1f);
 		changed |= ImGui::DragFloat("ytranslation", &ytranslation, 0.1f);
@@ -46,6 +46,7 @@ public:
 				int yw = y * width;
 				float fy = (float)y - fh / 2.0f;
 				float value = sinf(fy / period + xtranslation) * amplitude + ytranslation;
+				value = fmin(value, 1.0f);
 
 				for (int x = 0; x < height; x++) {
 					// float fx = (float)x / divider;

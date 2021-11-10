@@ -53,7 +53,8 @@ public:
 					float fy = (float)y - fh / 2.0f;
 					float fx = (float)x - fw / 2.0f;
 					float DistFromCenter = fmin(distance(xtranslation, ytranslation, fx, fy) / maxDist, amp);
-					dynamc->data[yw + x] =  amp - DistFromCenter;
+
+					dynamc->data[yw + x] = fmin(amp - DistFromCenter, 1.0f);
 				}
 			}
 			dynamc->updateGL();
