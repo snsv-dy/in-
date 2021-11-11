@@ -110,7 +110,7 @@ void NodeEditor::draw() {
 	// ImNodes::MiniMap();
 
 	// Drawing links between nodes
-	int link_i = 0;
+	int link_i = 10;
 	for (const auto& link : links) {
 		ImNodes::Link(link_i++, link.beg, link.end);
 	}
@@ -141,7 +141,15 @@ void NodeEditor::draw() {
 		printf("Nodes got: %d\n", nodesGot);
 
 		if (nodesGot == 2 && end_node->giveInput(end, &beg_node->dynamc)) {
-			links.push_back({-1, beg, end});
+			Link link = {
+				links_id++,
+				beg, end,
+				beg_node->id, end_node->id
+			};
+
+			links.push_back(link);
+			beg_node->addLink(link);
+			end_node->addLink(link);
 
 			printf("link[%d]! %d %d\n", links.size() - 1, beg, end);
 		}
@@ -149,8 +157,10 @@ void NodeEditor::draw() {
 
 	int destroyId;
 	if (ImNodes::IsLinkDestroyed(&destroyId)) {
-		printf("Link id: %d\n");
+		printf("Link id: %d\n", destroyId);
+		destroyId -= 10;
 		Link& link = links[destroyId];
+		printf("link: %d\n", link.id);
 
 		shared_ptr<UiNode> beg_node = nullptr;
 		shared_ptr<UiNode> end_node = nullptr;
@@ -172,6 +182,11 @@ void NodeEditor::draw() {
 
 		if (nodesGot == 2) {
 			if (end_node->unsetInput(link.end)) {
+				int nremoved = beg_node->removeLink(link.id) * 1;
+				nremoved += end_node->removeLink(link.id) * 1;
+				if (nremoved != 2) {
+					printf("\t\tnremoved != 2\n");
+				}
 				links.erase(links.begin() + destroyId);
 			} else {
 				printf("Could not unset node\n");
@@ -189,6 +204,63 @@ void NodeEditor::draw() {
 			}
 		}
 		printf("doubleclicked node: %d\n", node_id);
+	}
+
+	// Removing nodes
+	if (ImGui::IsKeyPressed(GLFW_KEY_DELETE)) {
+		int n_nodes_selected = ImNodes::NumSelectedNodes();
+		if (n_nodes_selected > 0) {
+			vector<int> node_ids;
+			node_ids.resize(n_nodes_selected);
+			
+			ImNodes::GetSelectedNodes(node_ids.data());
+			printf("Selected nods: ");
+			for (int node_id : node_ids) {
+				// Deleting node
+
+				// printf("%d ", a);
+				// node_id, link_id
+				vector<pair<int, int>> nodes_linking_to;
+				int node_index = 0;
+				for (shared_ptr<UiNode>& node : nodes) {
+					if ( node->id == node_id) {
+						vector<Link>* node_links = &node->links;
+						for (int i = 0; i < node_links->size(); i++) {
+							Link& link = (*node_links)[i];
+							int _link_id = link.id;
+							nodes_linking_to.push_back({link.begNode == node_id ? link.endNode : link.begNode, _link_id});
+							auto iter = std::find_if(links.begin(), links.end(), [_link_id](const Link& link) -> bool {
+									return link.id == _link_id;
+								});
+							assert(iter != links.end());
+							this->links.erase(iter);
+						}
+
+						nodes.erase(nodes.begin() + node_index);
+
+						break;
+					}
+					node_index++;
+				}
+
+				for (const auto& [node_id, link_id] : nodes_linking_to) {
+					for (shared_ptr<UiNode>& node : nodes) {
+						if ( node->id == node_id) {
+							node->removeLink(link_id);
+						}
+					}	
+				}
+			}
+			printf("\n");
+		}
+	}
+}
+
+void NodeEditor::DeleteNode(int nodeId) {
+	for (shared_ptr<UiNode>& node : nodes) {
+		if (node->id == nodeId) {
+			printf("got output: %d\n", node->id);
+		}
 	}
 }
 

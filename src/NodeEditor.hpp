@@ -5,8 +5,14 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <algorithm>
+
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+
 #include <imgui.h>
 #include <imnodes/imnodes.h>
+
 
 #include "DynamcTexture.hpp"
 #include "Generator.hpp"
@@ -24,6 +30,8 @@ struct Link {
 	int id;
 	int beg;
 	int end;
+	int begNode = -1;
+	int endNode = -1;
 	// Link(int id, int beg, int end)
 };
 
@@ -38,6 +46,7 @@ struct UiNode {
 	
 	vector<int> inputs;
 	vector<int> outputs;
+	vector<Link> links;
 	int output;
 
     float value = 0.0f;
@@ -61,6 +70,17 @@ struct UiNode {
 		this->colorSelected = colorSelected;
 	}
 
+	void drawGui() {
+		generator->drawGui();
+		ImGui::Text("Debug information");
+		ImGui::Text("Node id: %d", id);
+		ImGui::Text("Links %d", links.size());
+		for (const Link& link : links) {
+			ImGui::Text("id: %d, beg: %d, end: %d, bNode: %d, eNode: %d\n", 
+						link.id, link.beg, link.end, link.begNode, link.endNode);
+		}
+	}
+
 	void draw() {
 		const float node_width = 100.0f;
 		ImNodes::PushColorStyle(ImNodesCol_TitleBar, color);
@@ -74,10 +94,11 @@ struct UiNode {
 		ImGui::Text(generator->getName());
 		ImNodes::EndNodeTitleBar();
 
+		int input_index = 1;
 		for (const int& i : inputs) {
 			ImNodes::BeginInputAttribute(i);
 			ImGui::PushItemWidth(node_width);
-			ImGui::Text("input %d", i);
+			ImGui::Text("input %d", input_index++);
 			// ImGui::DragFloat("##hidelabel", &value, 0.01f, 0.0f, 1.0f);
 			ImGui::PopItemWidth();
 			ImNodes::EndInputAttribute();
@@ -95,6 +116,7 @@ struct UiNode {
 		// 	ImNodes::EndInputAttribute();
 		// }
 
+		int output_index = 1;
 		for (const int& o : outputs) {
 			// ImNodes::BeginInputAttribute(i);
 			// ImGui::PushItemWidth(node_width);
@@ -105,7 +127,7 @@ struct UiNode {
 
 			ImNodes::BeginOutputAttribute(o);
 			ImGui::Indent(40);
-			ImGui::Text("output %d", o);
+			ImGui::Text("output %d", output_index++);
 			ImNodes::EndOutputAttribute();
 		}
 
@@ -161,17 +183,36 @@ struct UiNode {
 
 		return generator->unsetInput(input_index);
 	}
+
+	bool addLink(Link link) {
+		links.push_back(link);
+	}
+
+	bool removeLink(int id) {
+		for (auto link = links.begin(); link != links.end(); link++) {
+			if (link->id == id) {
+				links.erase(link);
+				if (link->endNode == this->id) {
+					this->unsetInput(link->end);
+				}
+				return true;
+			}
+		}
+		return false;
+	}
 };
 
 class NodeEditor {
 	vector<Link> links; // change to list?
 	vector<shared_ptr<UiNode>> nodes;
 	int current_id = 0;
+	int links_id = 0;
 public:
 	shared_ptr<UiNode> selectedNode = nullptr;
 	NodeEditor();
 	void draw();
 	int getLinksSize();
+	void DeleteNode(int nodeId);
 	~NodeEditor();
 };
 

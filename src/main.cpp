@@ -7,6 +7,7 @@
 #include "imgui_impl_opengl3.h"
 
 #include <glad/glad.h>
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
@@ -293,7 +294,7 @@ int opengl_context(GLFWwindow* window) {
 		// }
 		// sigen.drawGui();
 		if (activeNode != nullptr) {
-			activeNode->generator->drawGui();
+			activeNode->drawGui();
 		}
 
 		ImGui::End();
