@@ -171,17 +171,18 @@ struct UiNode {
 	}
 
 	bool unsetInput(int id) {
+		printf("\tunsetting id: %d\n", id);
 		int input_index = 0;
 		for (const int& inp : inputs) {
 			if (id == inp) {
-				break;
+				return generator->unsetInput(input_index);
 			}
 			input_index++;
 		}
 
-		// printf("unsetting index: %d\n", input_index);
+		printf("\tinput index = %d\n", input_index);
 
-		return generator->unsetInput(input_index);
+		return false;	
 	}
 
 	bool addLink(Link link) {
@@ -191,20 +192,24 @@ struct UiNode {
 	bool removeLink(int id) {
 		for (auto link = links.begin(); link != links.end(); link++) {
 			if (link->id == id) {
-				links.erase(link);
-				if (link->endNode == this->id) {
-					this->unsetInput(link->end);
+				bool removable = link->endNode == this->id ? this->unsetInput(link->end) : true;
+				if (removable) {
+					links.erase(link);
 				}
-				return true;
+				return removable;
 			}
 		}
 		return false;
 	}
+
+	~UiNode() {
+		printf("Removing node: %d\n", id);
+	}
 };
 
 class NodeEditor {
-	vector<Link> links; // change to list?
-	vector<shared_ptr<UiNode>> nodes;
+	map<int, Link> links; // change to list?
+	map<int, shared_ptr<UiNode>> nodes;
 	int current_id = 0;
 	int links_id = 0;
 public:
