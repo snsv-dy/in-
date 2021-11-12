@@ -16,7 +16,6 @@ public:
 	virtual void gen() =0;
 
 	virtual void setTexture(DynamcTexture* dynamc) {
-		printf("Interface exec %p\n", this);
 		this->dynamc = dynamc;
 		fw = (float)dynamc->width;
 		fh = (float)dynamc->height;

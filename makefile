@@ -7,7 +7,10 @@ OBJ_DIR = bin
 VPATH = include/glad include/imnodes src
 
 EXECUTABLE = prog
-SRC = main.cpp include/glad/glad.c Shader.cpp NodeEditor.cpp 
+SRC = main.cpp include/glad/glad.c Shader.cpp NodeEditor.cpp UiNode.cpp
+LOCAL_OBJS = $(addsuffix .o, $(basename $(notdir $(SRC))))
+LOCAL_OBJS := $(LOCAL_OBJS:%.o=$(OBJ_DIR)/%.o)
+
 SRC += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/backends/imgui_impl_glfw.cpp $(IMGUI_DIR)/backends/imgui_impl_opengl3.cpp
 SRC += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
 SRC += include/imnodes/imnodes.cpp
@@ -25,7 +28,7 @@ all: $(OBJ_DIR)/$(EXECUTABLE)
 	@echo eh
 
 clean:
-	rm bin/main.o bin/Shader.o bin/NodeEditor.o bin/prog
+	rm $(LOCAL_OBJS)
 
 $(OBJ_DIR)/%.o:%.cpp
 	$(CC) $(CCFLAGS) -c -o $@ $<

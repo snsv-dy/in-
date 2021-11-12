@@ -217,6 +217,7 @@ void NodeEditor::draw() {
 						Link& link = (*node_links)[i];
 
 						nodes_linking_to.push_back({link.begNode == node_id ? link.endNode : link.begNode, link.id});
+						ImNodes::ClearLinkSelection(link.id);
 						links.erase(link.id);
 						// auto iter = std::find_if(links.begin(), links.end(), [_link_id](const Link& link) -> bool {
 						// 		return link.id == _link_id;
@@ -229,6 +230,7 @@ void NodeEditor::draw() {
 						selectedNode = nullptr;
 					}
 
+					ImNodes::ClearNodeSelection(node_id);
 					nodes.erase(node->id);
 				}
 						// break;
@@ -243,6 +245,31 @@ void NodeEditor::draw() {
 				}
 			}
 			printf("\n");
+		}
+
+		int n_links_selected = ImNodes::NumSelectedLinks();
+
+		if (n_links_selected > 0) {
+			vector<int> link_ids;
+			link_ids.resize(n_links_selected);
+			
+			ImNodes::GetSelectedLinks(link_ids.data());
+			for (const int& link_id : link_ids) {
+				if (auto link_it = links.find(link_id); link_it != links.end()) {
+					Link& link = link_it->second;
+
+					if (auto node_pair = nodes.find(link.begNode); node_pair != nodes.end()) {
+						node_pair->second->removeLink(link_id);
+					}
+
+					if (auto node_pair = nodes.find(link.endNode); node_pair != nodes.end()) {
+						node_pair->second->removeLink(link_id);
+					}
+
+					links.erase(link.id);
+				}
+				ImNodes::ClearLinkSelection(link_id);
+			}
 		}
 	}
 }
