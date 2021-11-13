@@ -197,8 +197,6 @@ int opengl_context(GLFWwindow* window) {
 		}
 
 		ImGui::Begin("Teren");
-		// ImGui::Text("then will you still call me superman?");
-		// ImGui::SliderFloat("If i'm alive", &fparam, 0.0f, 100.0f);
 		ImVec2 pos = ImGui::GetWindowPos();
 		ImVec2 size = ImGui::GetWindowSize();
 
@@ -307,9 +305,17 @@ int opengl_context(GLFWwindow* window) {
 
 		ImGui::End();
 
-		ImGui::Begin("eh");
+		ImGui::Begin("Texture preview");
+		pos = ImGui::GetWindowPos();
+		size = ImGui::GetWindowSize();
+
 		if (activeNode != nullptr) {
-			ImGui::Image((void *)activeNode->dynamc.texture, ImVec2(512, 512));
+			// ImGui::Image((void *)activeNode->dynamc.texture, ImVec2(512, 512));
+			int img_size = size.x < size.y ? size.x : size.y;
+			pos.x += size.y < size.x ? (size.x - size.y) / 2 : 0;
+			pos.y += size.x < size.y ? (size.y - size.x) / 2 : 0;
+			
+			ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)activeNode->dynamc.texture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
 		}
 		ImGui::End();
 		

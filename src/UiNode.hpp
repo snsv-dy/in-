@@ -47,8 +47,8 @@ struct UiNode {
 	DynamcTexture dynamc;
 	unique_ptr<Generator> generator;
 
-	ImU32 color = IM_COL32(11, 109, 191, 255);
-	ImU32 colorSelected = IM_COL32(81, 148, 204, 255);
+	ImU32 color = NODE_COLOR_DEFAULT;
+	ImU32 colorSelected = NODE_COLOR_DEFAULT_SELECTED;
 
 	UiNode(unique_ptr<Generator> generator);
 
