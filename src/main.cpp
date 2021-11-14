@@ -27,6 +27,7 @@
 #include "DynamcTexture.hpp"
 #include "SinGen.hpp"
 #include "GradGen.hpp"
+#include "ColorGenerator.hpp"
 
 int screen_width = 1200;
 int screen_height = 1000;
@@ -161,7 +162,10 @@ int opengl_context(GLFWwindow* window) {
 	unsigned int projectionLocation = glGetUniformLocation(shader.getProgram(), "projection");
 	unsigned int viewLocation = glGetUniformLocation(shader.getProgram(), "view");
 	unsigned int modelLocation = glGetUniformLocation(shader.getProgram(), "model");
-	// unsigned int heightLocation = glGetUniformLocation(shader.getProgram(), "heightmap");
+
+	unsigned int heightLocation = glGetUniformLocation(shader.getProgram(), "heightmapTexture");
+	unsigned int colorLocation = glGetUniformLocation(shader.getProgram(), "colorTexture");
+	unsigned int colorFlagLocation = glGetUniformLocation(shader.getProgram(), "colorData");
 
 	int lastWindowSize[2] = {-1, -1};
 	ImGui::GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
@@ -259,9 +263,26 @@ int opengl_context(GLFWwindow* window) {
 		glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model));
+
+		glUniform1i(heightLocation, 0);
+		glUniform1i(colorLocation, 1);
 		// glBindTexture(GL_TEXTURE_2D, heightmap_texture);
 		if (activeNode != nullptr) {
-			glBindTexture(GL_TEXTURE_2D, activeNode->dynamc.texture);
+			glUniform1i(colorFlagLocation, !activeNode->dynamc.monochrome);
+
+			if (activeNode->dynamc.monochrome) {
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, activeNode->dynamc.texture);
+				
+			} else {
+				ColorGenerator* generator = (ColorGenerator*)activeNode->generator.get();
+				
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, generator->input1->texture);
+
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, activeNode->dynamc.texture);
+			}
 		} else {
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}

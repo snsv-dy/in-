@@ -19,6 +19,7 @@
 #include "SinGen.hpp"
 #include "GradGen.hpp"
 #include "CombinerGenerator.hpp"
+#include "ColorGenerator.hpp"
 #include "UiNode.hpp"
 
 using namespace std;

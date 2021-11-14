@@ -63,6 +63,13 @@ void NodeEditor::draw() {
 			color = NODE_COLOR_GREEN;
 			colorSelected = NODE_COLOR_GREEN_SELECTED;
 		} 
+		
+		if (ImGui::MenuItem("Color")) {
+			addNode = true;
+			type = 3;
+			color = NODE_COLOR_YELLOW;
+			colorSelected = NODE_COLOR_YELLOW_SELECTED;
+		} 
 
 		if (addNode) {
 			unique_ptr<Generator> generator;
@@ -70,12 +77,17 @@ void NodeEditor::draw() {
 				case 0: generator = make_unique<SinGenerator>(); break;
 				case 1: generator = make_unique<GradGenerator>(); break;
 				case 2: generator = make_unique<CombinerGenerator>(); break;
+				case 3: generator = make_unique<ColorGenerator>(); break;
 			}
 
-			shared_ptr<UiNode> node = make_shared<UiNode>(move(generator));
+			shared_ptr<UiNode> node = make_shared<UiNode>(move(generator), type == 3 ? false : true);
 			node->id = ++current_id;
 			if (type == 2) {
 				node->inputs.push_back(++current_id);
+				node->inputs.push_back(++current_id);
+			}
+
+			if (type == 3) {
 				node->inputs.push_back(++current_id);
 			}
 

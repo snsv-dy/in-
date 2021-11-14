@@ -7,7 +7,10 @@ in vec3 position;
 in vec3 color;
 in vec2 texPos;
 
-uniform sampler2D heightmap;
+uniform sampler2D heightmapTexture;
+uniform sampler2D colorTexture;
+
+uniform bool colorData;
 
 float elevationFunc(vec2 pos);
 
@@ -19,12 +22,12 @@ vec3 getNorm(vec2 pos) {
 	float B = elevationFunc(pos - vec2(0.0, step));
 
 	return normalize(vec3(2.0 * (R - L), 2.0 * (B - T), -1.0));
-	//return texture(heightmap, pos / 2.0).r;
+	//return texture(heightmapTexture, pos / 2.0).r;
 }
 
 float elevationFunc(vec2 pos) {
 	//return 0.0;
-	return texture(heightmap, pos).r;
+	return texture(heightmapTexture, pos).r;
 	//pos *= 1.0;
 	//float rd = 0.5;
 	//return pos.x * pos.x;
@@ -63,15 +66,15 @@ void main() {
 	// 	col = samples[2];
 	// }
 
-	vec3 col = color;
+	vec3 col = colorData ? texture(colorTexture, texPos).rgb : color;
 
 	//float diff = max(dot(getNorm(texPos), normalize(sunPos)), 0.0);
 	vec3 normal = getNorm(texPos);
 	normal = vec3(normal.x, -normal.z, normal.y);
-	vec3 lightDir = normalize(sunPos - vec3(texPos.x, texture(heightmap, texPos).r, texPos.y));
+	vec3 lightDir = normalize(sunPos - vec3(texPos.x, texture(heightmapTexture, texPos).r, texPos.y));
 	float diff = max(dot(normal, lightDir), 0.0);
 	col *= diff;
 	// col = vec3(1.0, abs(position.y), abs(position.z));
 
-	FragColor = vec4(vec3(1.0, 1.0, 1.0) * diff, 1.0);
+	FragColor = vec4(col, 1.0);
 }

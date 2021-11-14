@@ -1,7 +1,9 @@
-#ifndef _DYNAMC_TEXTURE_HPP_
+	#ifndef _DYNAMC_TEXTURE_HPP_
 #define _DYNAMC_TEXTURE_HPP_
 
 #include <glad/glad.h>
+
+using namespace std;
 
 class DynamcTexture {
 public:
@@ -9,11 +11,18 @@ public:
 	float* data;
 	unsigned int texture;
 	float divider = 10.0f;
+	bool monochrome = true;
 
 	// void (*generator)(float*, int, int);
 	// Grayscale
-	DynamcTexture(const int width, const int height): width{width}, height{height}, data{nullptr} {
-		data = new float[width * height];
+	DynamcTexture(const int width, const int height, bool monochrome = true): width{width}, height{height}, data{nullptr} {
+		if (monochrome) {
+			data = new float[width * height];
+		} else {
+			data = new float[width * height * 3];
+		}
+
+		this->monochrome = monochrome;
 
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);
@@ -21,14 +30,18 @@ public:
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		GLint swizzleMask[] = {GL_RED, GL_RED, GL_RED, GL_ONE};
-		glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
+
+		if (monochrome) {
+			GLint swizzleMask[] = {GL_RED, GL_RED, GL_RED, GL_ONE};
+			glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
+		}
 		printf("Dynamc [%p] created\n", data);
 	}
 
 	void updateGL() {
 		glBindTexture(GL_TEXTURE_2D, texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 	width, height, 0, GL_RED, GL_FLOAT, data);
+		GLuint color_type = monochrome ? GL_RED : GL_RGB;
+		glTexImage2D(GL_TEXTURE_2D, 0, color_type, 	width, height, 0, color_type, GL_FLOAT, data);
 		// glGenerateMipmap
 	}
 
@@ -43,6 +56,10 @@ public:
 		// }
 
 		updateGL();
+	}
+
+	pair<int, int> getSize() {
+		return {width, height};
 	}
 
 	~DynamcTexture() {

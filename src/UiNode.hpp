@@ -32,6 +32,8 @@ const ImU32 NODE_COLOR_DEFAULT = IM_COL32(11, 109, 191, 255);
 const ImU32 NODE_COLOR_DEFAULT_SELECTED = IM_COL32(81, 148, 204, 255);
 const ImU32 NODE_COLOR_GREEN = IM_COL32(11, 191, 109, 255);
 const ImU32 NODE_COLOR_GREEN_SELECTED = IM_COL32(81, 204, 148, 255);
+const ImU32 NODE_COLOR_YELLOW = IM_COL32(191, 180, 11, 255);
+const ImU32 NODE_COLOR_YELLOW_SELECTED = IM_COL32(204, 197, 81, 255);
 
 struct UiNode {
     int id;
@@ -50,7 +52,7 @@ struct UiNode {
 	ImU32 color = NODE_COLOR_DEFAULT;
 	ImU32 colorSelected = NODE_COLOR_DEFAULT_SELECTED;
 
-	UiNode(unique_ptr<Generator> generator);
+	UiNode(unique_ptr<Generator> generator, bool monochromeTexture);
 
 	void setColors(ImU32 color, ImU32 colorSelected);
 	void drawGui();

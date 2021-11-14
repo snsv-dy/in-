@@ -1,6 +1,6 @@
 #include "UiNode.hpp"
 
-UiNode::UiNode(unique_ptr<Generator> generator): dynamc{texWidth, texWidth}, generator{move(generator)} {
+UiNode::UiNode(unique_ptr<Generator> generator, bool monochromeTexture = true): dynamc{texWidth, texWidth, monochromeTexture}, generator{move(generator)} {
 // generator{make_unique<SinGenerator>(&dynamc, texWidth, texWidth)} {
 	this->generator->setTexture(&dynamc);
 

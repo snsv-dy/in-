@@ -9,7 +9,7 @@ uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
 
-uniform sampler2D heightmap;
+uniform sampler2D heightmapTexture;
 
 float elevationFunc(vec2 pos) {
 	pos *= 1.0;
@@ -43,7 +43,7 @@ void main() {
 	texPos.y /= 2.0;
 
 	float el = elevationFunc(pos.xz);
-	position.y = texture(heightmap, texPos).r;
+	position.y = texture(heightmapTexture, texPos).r;
 
 
 	float minv = -0.5;
