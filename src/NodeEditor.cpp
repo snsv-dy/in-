@@ -6,7 +6,7 @@ NodeEditor::NodeEditor() {
 	ImNodes::StyleColorsDark();
     // ImNodes::PushAttributeFlag(ImNodesAttributeFlags_EnableLinkDetachWithDragClick);
     ImNodes::GetIO().LinkDetachWithModifierClick.Modifier = &ImGui::GetIO().KeyCtrl;
-
+	
 	// UiNode node1;
 	// node1.id = ++current_id;
 	// node1.input = ++current_id;
@@ -21,6 +21,84 @@ NodeEditor::NodeEditor() {
 	// nodes[node2.id] = node2;
 	// nodes.push_back(node1);
 	// nodes.push_back(node2);
+}
+
+// Dodaj jakieś komunikaty w gui w przypadku błędów przy zapisie/odczycie.
+void NodeEditor::save(const char* filename) {
+	json json_data;
+
+	vector<json> serialized_nodes;
+	for (auto& [id, node] : nodes) {
+		json node_json = node->serialize();
+		node_json["position"] = {};
+		serialized_nodes.push_back();
+	}
+	json_data["nodes"] = serialized_nodes;
+	
+	ofstream out_file (filename);
+	if (out_file.is_open()) {
+		out_file << setw(4) << json_data;
+		if (out_file.bad()) {
+			printf("Out file bad\n");	
+		}
+		out_file.close();
+	} else {
+		printf("File not open\n");
+	}
+}
+
+void NodeEditor::load(const char* filename) {
+	ifstream in_file(filename);
+
+	if (in_file.good()) {
+		json json_data;
+		try {
+			in_file >> json_data;
+			if (json_data.count("nodes") != 0) {
+				printf("Nodes: \n");
+				for (const json& node : json_data["nodes"] ) {
+					cout << setw(4) << json_data << endl;
+				}
+			}
+		} catch (const json::parse_error& err) {
+			printf("Exception while reading file: %s\n", err.what());
+		}
+	}
+}
+
+void NodeEditor::addNode(const int& type) {
+	unique_ptr<Generator> generator;
+
+	switch (type) {
+		case 0: generator = make_unique<SinGenerator>(); break;
+		case 1: generator = make_unique<GradGenerator>(); break;
+		case 2: generator = make_unique<CombinerGenerator>(); break;
+		case 3: generator = make_unique<ColorGenerator>(); break;
+	}
+
+	shared_ptr<UiNode> node = make_shared<UiNode>(move(generator), type == 3 ? false : true);
+	node->id = ++current_id;
+	node->type_i = type;
+	if (type == 2) {
+		node->inputs.push_back(++current_id);
+		node->inputs.push_back(++current_id);
+		color = NODE_COLOR_GREEN;
+		colorSelected = NODE_COLOR_GREEN_SELECTED;
+	}
+
+	if (type == 3) {
+		node->inputs.push_back(++current_id);
+		color = NODE_COLOR_YELLOW;
+		colorSelected = NODE_COLOR_YELLOW_SELECTED;
+	}
+
+	node->outputs.push_back(++current_id);
+	node->setColors(color, colorSelected);
+
+	// nodes.push_back(node);
+	nodes[node->id] = node;
+
+	ImNodes::SetNodeScreenSpacePos(node->id, mouse_pos);
 }
 
 void NodeEditor::draw() {
@@ -43,61 +121,59 @@ void NodeEditor::draw() {
 	if (ImGui::BeginPopup("Add node")) {
 		const ImVec2 mouse_pos = ImGui::GetMousePosOnOpeningCurrentPopup();
 
-		bool addNode = false;
+		bool addingNode = false;
 		int type = 0;
 		ImU32 color = NODE_COLOR_DEFAULT;
 		ImU32 colorSelected = NODE_COLOR_DEFAULT_SELECTED;
 
 		if (ImGui::MenuItem("Sin")) {
-			addNode = true;
+			addingNode = true;
 		} 
 
 		if (ImGui::MenuItem("Grad")) {
-			addNode = true;
+			addingNode = true;
 			type = 1;
 		} 
 		
 		if (ImGui::MenuItem("Combine")) {
-			addNode = true;
+			addingNode = true;
 			type = 2;
-			color = NODE_COLOR_GREEN;
-			colorSelected = NODE_COLOR_GREEN_SELECTED;
 		} 
 		
 		if (ImGui::MenuItem("Color")) {
-			addNode = true;
+			addingNode = true;
 			type = 3;
-			color = NODE_COLOR_YELLOW;
-			colorSelected = NODE_COLOR_YELLOW_SELECTED;
 		} 
 
-		if (addNode) {
-			unique_ptr<Generator> generator;
-			switch (type) {
-				case 0: generator = make_unique<SinGenerator>(); break;
-				case 1: generator = make_unique<GradGenerator>(); break;
-				case 2: generator = make_unique<CombinerGenerator>(); break;
-				case 3: generator = make_unique<ColorGenerator>(); break;
-			}
+		if (addingNode) {
+			addNode(type);
+			// unique_ptr<Generator> generator;
+			// switch (type) {
+			// 	case 0: generator = make_unique<SinGenerator>(); break;
+			// 	case 1: generator = make_unique<GradGenerator>(); break;
+			// 	case 2: generator = make_unique<CombinerGenerator>(); break;
+			// 	case 3: generator = make_unique<ColorGenerator>(); break;
+			// }
 
-			shared_ptr<UiNode> node = make_shared<UiNode>(move(generator), type == 3 ? false : true);
-			node->id = ++current_id;
-			if (type == 2) {
-				node->inputs.push_back(++current_id);
-				node->inputs.push_back(++current_id);
-			}
+			// shared_ptr<UiNode> node = make_shared<UiNode>(move(generator), type == 3 ? false : true);
+			// node->id = ++current_id;
+			// node->type_i = type;
+			// if (type == 2) {
+			// 	node->inputs.push_back(++current_id);
+			// 	node->inputs.push_back(++current_id);
+			// }
 
-			if (type == 3) {
-				node->inputs.push_back(++current_id);
-			}
+			// if (type == 3) {
+			// 	node->inputs.push_back(++current_id);
+			// }
 
-			node->outputs.push_back(++current_id);
-			node->setColors(color, colorSelected);
+			// node->outputs.push_back(++current_id);
+			// node->setColors(color, colorSelected);
 
-			// nodes.push_back(node);
-			nodes[node->id] = node;
+			// // nodes.push_back(node);
+			// nodes[node->id] = node;
 
-			ImNodes::SetNodeScreenSpacePos(node->id, mouse_pos);
+			// ImNodes::SetNodeScreenSpacePos(node->id, mouse_pos);
 		}
 
 

@@ -144,6 +144,17 @@ bool UiNode::removeLink(int id) {
 	return false;
 }
 
+json UiNode::serialize() {
+	json result;
+	result["id"] = id;
+	result["type"] = 0;
+	result["inputs"] = inputs;
+	result["outputs"] = outputs;
+	result["links"] = json::array();
+
+	return result;
+}
+
 UiNode::~UiNode() {
 	printf("Removing node: %d\n", id);
 }

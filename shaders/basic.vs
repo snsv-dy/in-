@@ -46,13 +46,13 @@ void main() {
 	position.y = texture(heightmapTexture, texPos).r;
 
 
-	float minv = -0.5;
-	float maxv = 0.5;
+	float minv = 0.0;
+	float maxv = 1.0;
 	float range = maxv - minv;
 	int steps = 4;
 	float stepv = range / (steps - 1);
 
-	if (position.y > minv + 0.0 * stepv && position.y < minv + 1.0 * stepv) {
+	if (position.y >= minv + 0.0 * stepv && position.y < minv + 1.0 * stepv) {
 		color = mix(samples[0], samples[1], remap(minv + 0.0 * stepv, minv + 1.0 * stepv, position.y));
 	} else if (position.y >= minv + 1.0 * stepv && position.y < minv + 2.0 * stepv) {
 		color = mix(samples[1], samples[2], remap(minv + 1.0 * stepv, minv + 2.0 * stepv, position.y));

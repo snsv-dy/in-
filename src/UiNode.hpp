@@ -12,11 +12,13 @@
 
 #include <imgui.h>
 #include <imnodes/imnodes.h>
+#include <json.hpp>
 
 #include "DynamcTexture.hpp"
 #include "Generator.hpp"
 
 using namespace std;
+using json = nlohmann::json;
 
 struct Link {
 	int id;
@@ -37,6 +39,7 @@ const ImU32 NODE_COLOR_YELLOW_SELECTED = IM_COL32(204, 197, 81, 255);
 
 struct UiNode {
     int id;
+	int type_i = 0;
 	
 	vector<int> inputs;
 	vector<int> outputs;
@@ -63,6 +66,7 @@ struct UiNode {
 	bool unsetInput(int id);
 	bool addLink(Link link);
 	bool removeLink(int id);
+	json serialize();
 
 	~UiNode();
 };

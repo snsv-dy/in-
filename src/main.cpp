@@ -273,7 +273,6 @@ int opengl_context(GLFWwindow* window) {
 			if (activeNode->dynamc.monochrome) {
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, activeNode->dynamc.texture);
-				
 			} else {
 				ColorGenerator* generator = (ColorGenerator*)activeNode->generator.get();
 				
@@ -308,6 +307,14 @@ int opengl_context(GLFWwindow* window) {
 		ImGui::Text("cameraRotation: %2.2f %2.2f\n", cameraRotation.x, cameraRotation.y);
 		ImGui::Text("cameraOrigin: %2.2f %2.2f %2.2f\n", cameraOrigin.x, cameraOrigin.y, cameraOrigin.z);
 		ImGui::Text("cameraUp: %2.2f %2.2f %2.2f\n", cameraUp.x, cameraUp.y, cameraUp.z);
+		if (ImGui::Button("Save nodes")) {
+			node_editor.save();
+		}
+
+		if (ImGui::Button("Load nodes")) {
+			node_editor.load();
+		}
+
 		// if (ImGui::SliderFloat("Divider", &dynamc.divider, 0.0f, 300.0f)) {
 		// 	dynamc.gen();
 		// }
