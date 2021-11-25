@@ -64,6 +64,22 @@ public:
 	const char* getName() {
 		return "Grad";
 	}
+
+	json serialize() {
+		json result;
+		result["amp"] = amp;
+		result["radius"] = radius;
+		result["xtranslation"] = xtranslation;
+		result["ytranslation"] = ytranslation;
+		return result;
+	}
+
+	void unpackParams(const json& json_data) {
+		amp = json_data["amp"];
+		radius = json_data["radius"];
+		xtranslation = json_data["xtranslation"];
+		ytranslation = json_data["ytranslation"];
+	}
 };
 
 #endif

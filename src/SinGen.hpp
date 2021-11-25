@@ -2,9 +2,12 @@
 #define _SIN_GENERATOR_HPP_
 
 #include <cmath>
+#include <json.hpp>
 #include "imgui.h"
 #include "DynamcTexture.hpp"
 #include "Generator.hpp"
+
+using json = nlohmann::json;
 
 class SinGenerator : public Generator {
 	float amplitude = 0.5f;
@@ -60,6 +63,24 @@ public:
 
 	const char* getName() {
 		return "Sin";
+	}
+
+	json serialize() {
+		json result;
+		result["amplitude"] = amplitude;
+		result["period"] = period;
+		result["xtranslation"] = xtranslation;
+		result["ytranslation"] = ytranslation;
+		result["axis"] = axis;
+		return result;
+	}
+
+	void unpackParams(const json& json_data) {
+		amplitude = json_data["amplitude"];
+		period = json_data["period"];
+		xtranslation = json_data["xtranslation"];
+		ytranslation = json_data["ytranslation"];
+		axis = json_data["axis"];
 	}
 };
 

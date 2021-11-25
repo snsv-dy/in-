@@ -1,7 +1,10 @@
 #ifndef _COMBINER_GENERATOR_HPP_
 #define _COMBINER_GENERATOR_HPP_
 
+#include <json.hpp>
 #include "Generator.hpp"
+
+using json = nlohmann::json;
 
 enum class CombineFunctions {
 	ADD,
@@ -137,6 +140,17 @@ private:
 				dynamc->data[index] = out;
 			}
 		}
+	}
+
+	json serialize() {
+		json result;
+		result["func"] = func;
+	
+		return result;
+	}
+
+	void unpackParams(const json& json_data) {
+		func = json_data["func"];
 	}
 };
 

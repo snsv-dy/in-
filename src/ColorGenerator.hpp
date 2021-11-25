@@ -2,12 +2,14 @@
 #define _COLOR_GENERATOR_HPP_
 
 #include <vector>
+#include <json.hpp>
 
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "Generator.hpp"
 
 using namespace std;
+using json = nlohmann::json;
 
 struct colorStep {
 	float threshold;
@@ -155,6 +157,31 @@ public:
 
 	const char* getName() {
 		return "Color";
+	}
+
+	json serialize() {
+		json result;
+		json steps = json::array();
+		for (const colorStep& step : colorSteps) {
+			steps.push_back({
+				{"threshold", step.threshold},
+				{"color", {step.color.x, step.color.y, step.color.z, step.color.w}}
+			});
+		}
+
+		result["steps"] = steps;
+
+		return result;
+	}
+
+	void unpackParams(const json& json_data) {
+		colorSteps.clear();
+		for (const json& step : json_data["steps"]) {
+			colorSteps.push_back({
+				step["threshold"],
+				{step["color"][0], step["color"][1], step["color"][2], step["color"][3]}
+			});
+		}
 	}
 };
 

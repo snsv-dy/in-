@@ -1,7 +1,10 @@
 #ifndef _GENERATOR_HPP_
 #define _GENERATOR_HPP_
 
+#include <json.hpp>
 #include "DynamcTexture.hpp"
+
+using json = nlohmann::json;
 
 class Generator {
 protected:
@@ -31,6 +34,8 @@ public:
 	virtual bool hasInput() { return false; }
 	virtual bool setInput(int index, DynamcTexture* dynamc) { return false; }
 	virtual bool unsetInput(int index) { return false; }
+	virtual json serialize() { return json({}); };
+	virtual void unpackParams(const json& json_data) =0;
 
 	virtual ~Generator() {}
 };

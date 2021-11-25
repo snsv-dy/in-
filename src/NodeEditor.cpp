@@ -35,7 +35,6 @@ void NodeEditor::save(const char* filename) {
 		node_json["position"] = {
 			{"x", gridSpace.x}, {"y", gridSpace.y}
 		};
-		// printf("save Node [%d] position: %2.2f, %2.2f\n", node->id, node_json["position"]["x"], position.y);
 
 		json_nodes.push_back(node_json);
 	}
@@ -117,7 +116,6 @@ void NodeEditor::unpackNode(const json& json_node) {
 	shared_ptr<UiNode> node = make_shared<UiNode>(json_node);
 
 	ImVec2 position {json_node["position"]["x"], json_node["position"]["y"]};
-	printf("load Node [%d] position: %2.2f, %2.2f\n", node->id, position.x, position.y);
 	ImNodes::SetNodeGridSpacePos(node->id, position);
 	nodes[node->id] = node;
 }
