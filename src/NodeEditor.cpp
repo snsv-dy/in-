@@ -27,13 +27,34 @@ NodeEditor::NodeEditor() {
 void NodeEditor::save(const char* filename) {
 	json json_data;
 
-	vector<json> serialized_nodes;
+	json json_nodes = json::array();
 	for (auto& [id, node] : nodes) {
 		json node_json = node->serialize();
-		node_json["position"] = {};
-		serialized_nodes.push_back();
+		
+		ImVec2 gridSpace = ImNodes::GetNodeGridSpacePos(id);
+		node_json["position"] = {
+			{"x", gridSpace.x}, {"y", gridSpace.y}
+		};
+		// printf("save Node [%d] position: %2.2f, %2.2f\n", node->id, node_json["position"]["x"], position.y);
+
+		json_nodes.push_back(node_json);
 	}
-	json_data["nodes"] = serialized_nodes;
+	json_data["nodes"] = json_nodes;
+
+ 	json json_links = json::array();
+	for (auto& [id, link] : links) {
+		json_links.push_back({
+			{"id", link.id},
+			{"beg", link.beg},
+			{"end",  link.end},
+			{"begNode", link.begNode},
+			{"endNode", link.endNode}
+		});
+	}
+	json_data["links"] = json_links;
+
+	json_data["current_id"] = current_id;
+	json_data["links_id"] = links_id;
 	
 	ofstream out_file (filename);
 	if (out_file.is_open()) {
@@ -47,6 +68,11 @@ void NodeEditor::save(const char* filename) {
 	}
 }
 
+bool NodeEditor::verify_link(const Link& link) {
+	return nodes.count(link.begNode) == 1 &&
+			nodes.count(link.endNode) == 1;
+}
+
 void NodeEditor::load(const char* filename) {
 	ifstream in_file(filename);
 
@@ -54,20 +80,53 @@ void NodeEditor::load(const char* filename) {
 		json json_data;
 		try {
 			in_file >> json_data;
-			if (json_data.count("nodes") != 0) {
-				printf("Nodes: \n");
-				for (const json& node : json_data["nodes"] ) {
-					cout << setw(4) << json_data << endl;
+
+			current_id = json_data["current_id"];
+			links_id = json_data["links_id"];
+
+			for (const json& node : json_data["nodes"] ) {
+				unpackNode(node);
+			}
+
+			for (const json& link : json_data["links"] ) {
+				Link l = {
+					link["id"],
+					link["beg"],
+					link["end"],
+					link["begNode"],
+					link["endNode"]
+				};
+
+				if (verify_link(l)) {
+					links[l.id] = l;
+					shared_ptr<UiNode>& begNode = nodes[l.begNode];
+					shared_ptr<UiNode>& endNode = nodes[l.endNode];
+					begNode->addLink(l);
+					endNode->addLink(l);
+					endNode->giveInput(l.end, &begNode->dynamc);
 				}
 			}
+
 		} catch (const json::parse_error& err) {
 			printf("Exception while reading file: %s\n", err.what());
 		}
 	}
 }
 
-void NodeEditor::addNode(const int& type) {
+void NodeEditor::unpackNode(const json& json_node) {
+	shared_ptr<UiNode> node = make_shared<UiNode>(json_node);
+
+	ImVec2 position {json_node["position"]["x"], json_node["position"]["y"]};
+	printf("load Node [%d] position: %2.2f, %2.2f\n", node->id, position.x, position.y);
+	ImNodes::SetNodeGridSpacePos(node->id, position);
+	nodes[node->id] = node;
+}
+
+void NodeEditor::addNode(const int& type, int id, ImVec2 position) {
 	unique_ptr<Generator> generator;
+
+	ImU32 color = NODE_COLOR_DEFAULT;
+	ImU32 colorSelected = NODE_COLOR_DEFAULT_SELECTED;
 
 	switch (type) {
 		case 0: generator = make_unique<SinGenerator>(); break;
@@ -78,6 +137,7 @@ void NodeEditor::addNode(const int& type) {
 
 	shared_ptr<UiNode> node = make_shared<UiNode>(move(generator), type == 3 ? false : true);
 	node->id = ++current_id;
+
 	node->type_i = type;
 	if (type == 2) {
 		node->inputs.push_back(++current_id);
@@ -98,7 +158,7 @@ void NodeEditor::addNode(const int& type) {
 	// nodes.push_back(node);
 	nodes[node->id] = node;
 
-	ImNodes::SetNodeScreenSpacePos(node->id, mouse_pos);
+	ImNodes::SetNodeScreenSpacePos(node->id, position);
 }
 
 void NodeEditor::draw() {
@@ -146,51 +206,15 @@ void NodeEditor::draw() {
 		} 
 
 		if (addingNode) {
-			addNode(type);
-			// unique_ptr<Generator> generator;
-			// switch (type) {
-			// 	case 0: generator = make_unique<SinGenerator>(); break;
-			// 	case 1: generator = make_unique<GradGenerator>(); break;
-			// 	case 2: generator = make_unique<CombinerGenerator>(); break;
-			// 	case 3: generator = make_unique<ColorGenerator>(); break;
-			// }
-
-			// shared_ptr<UiNode> node = make_shared<UiNode>(move(generator), type == 3 ? false : true);
-			// node->id = ++current_id;
-			// node->type_i = type;
-			// if (type == 2) {
-			// 	node->inputs.push_back(++current_id);
-			// 	node->inputs.push_back(++current_id);
-			// }
-
-			// if (type == 3) {
-			// 	node->inputs.push_back(++current_id);
-			// }
-
-			// node->outputs.push_back(++current_id);
-			// node->setColors(color, colorSelected);
-
-			// // nodes.push_back(node);
-			// nodes[node->id] = node;
-
-			// ImNodes::SetNodeScreenSpacePos(node->id, mouse_pos);
+			addNode(type, -1, mouse_pos);
 		}
-
-
-		// if (ImGui::MenuItem("node1")) {
-		// 	UiNode node;
-		// 	node.id = ++current_id;
-		// 	node.input = ++current_id;
-		// 	node.output = ++current_id;
-
-		// 	nodes[node.id] = node;
-
-		// 	ImNodes::SetNodeScreenSpacePos(node.id, mouse_pos);
-		// }
 
 		ImGui::EndPopup();
 	}
 
+	//
+	// Drawing nodes
+	//
 	const float node_width = 100.0f;
 	// for (shared_ptr<UiNode>& node : nodes) {
 	// for (map<int, UiNode>::iterator it = nodes.begin(); it != nodes.end(); it++) {
@@ -209,40 +233,7 @@ void NodeEditor::draw() {
 	
 	int beg, end;
 	if (ImNodes::IsLinkCreated(&beg, &end)) {
-		shared_ptr<UiNode> beg_node = nullptr;
-		shared_ptr<UiNode> end_node = nullptr;
-		int nodesGot = 0;
-
-
-		printf("attempt %d %d\n", beg, end);
-
-		for (auto& [id, node] : nodes) {
-			if (node->hasOutput(beg)) {
-				beg_node = node;
-				nodesGot++;
-				printf("got output: %d\n", node->id);
-			} else if(node->hasInput(end)) {
-				end_node = node;
-				nodesGot++;
-				printf("got input: %d\n", node->id);
-			}
-		}
-
-		printf("Nodes got: %d\n", nodesGot);
-
-		if (nodesGot == 2 && end_node->giveInput(end, &beg_node->dynamc)) {
-			Link link = {
-				links_id++,
-				beg, end,
-				beg_node->id, end_node->id
-			};
-
-			links[link.id] = link;
-			beg_node->addLink(link);
-			end_node->addLink(link);
-
-			printf("link[%d]! %d %d\n", links.size() - 1, beg, end);
-		}
+		addLink(beg, end);
 	}
 
 	int destroyId;
@@ -359,6 +350,42 @@ void NodeEditor::draw() {
 				ImNodes::ClearLinkSelection(link_id);
 			}
 		}
+	}
+}
+
+void NodeEditor::addLink(const int& beg, const int& end) {
+	shared_ptr<UiNode> beg_node = nullptr;
+	shared_ptr<UiNode> end_node = nullptr;
+	int nodesGot = 0;
+
+	printf("attempt %d %d\n", beg, end);
+
+	for (auto& [id, node] : nodes) {
+		if (node->hasOutput(beg)) {
+			beg_node = node;
+			nodesGot++;
+			printf("got output: %d\n", node->id);
+		} else if(node->hasInput(end)) {
+			end_node = node;
+			nodesGot++;
+			printf("got input: %d\n", node->id);
+		}
+	}
+
+	printf("Nodes got: %d\n", nodesGot);
+
+	if (nodesGot == 2 && end_node->giveInput(end, &beg_node->dynamc)) {
+		Link link = {
+			links_id++,
+			beg, end,
+			beg_node->id, end_node->id
+		};
+
+		links[link.id] = link;
+		beg_node->addLink(link);
+		end_node->addLink(link);
+
+		printf("link[%d]! %d %d\n", links.size() - 1, beg, end);
 	}
 }
 

@@ -15,7 +15,12 @@
 #include <json.hpp>
 
 #include "DynamcTexture.hpp"
+
 #include "Generator.hpp"
+#include "SinGen.hpp"
+#include "GradGen.hpp"
+#include "CombinerGenerator.hpp"
+#include "ColorGenerator.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -56,6 +61,7 @@ struct UiNode {
 	ImU32 colorSelected = NODE_COLOR_DEFAULT_SELECTED;
 
 	UiNode(unique_ptr<Generator> generator, bool monochromeTexture);
+	UiNode(const json& json_data);
 
 	void setColors(ImU32 color, ImU32 colorSelected);
 	void drawGui();

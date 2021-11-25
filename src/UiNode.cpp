@@ -7,6 +7,50 @@ UiNode::UiNode(unique_ptr<Generator> generator, bool monochromeTexture = true): 
 	this->generator->gen();
 }
 
+UiNode::UiNode(const json& json_data): dynamc{texWidth, texWidth, json_data["type"] != 3} {
+	int type = json_data["type"];
+	
+	switch (type) {
+		case 0: generator = move(make_unique<SinGenerator>()); break;
+		case 1: generator = move(make_unique<GradGenerator>()); break;
+		case 2: generator = move(make_unique<CombinerGenerator>()); break;
+		case 3: generator = move(make_unique<ColorGenerator>()); break;
+	}
+
+	this->generator->setTexture(&dynamc);
+
+	// shared_ptr<UiNode> node = make_shared<UiNode>(move(generator), type == 3 ? false : true);
+	this->id = json_data["id"];
+	this->type_i = type;
+	
+	ImU32 color = NODE_COLOR_DEFAULT;
+	ImU32 colorSelected = NODE_COLOR_DEFAULT_SELECTED;
+
+	if (type == 2) {
+		// this->inputs.push_back(++current_id);
+		// this->inputs.push_back(++current_id);
+		color = NODE_COLOR_GREEN;
+		colorSelected = NODE_COLOR_GREEN_SELECTED;
+	}
+
+	if (type == 3) {
+		// this->inputs.push_back(++current_id);
+		color = NODE_COLOR_YELLOW;
+		colorSelected = NODE_COLOR_YELLOW_SELECTED;
+	}
+
+	for (const int& input : json_data["inputs"]) {
+		inputs.push_back(input);
+	}
+
+	for (const int& output : json_data["outputs"]) {
+		outputs.push_back(output);
+	}
+
+	this->setColors(color, colorSelected);
+	this->generator->gen();
+}
+
 void UiNode::setColors(ImU32 color = IM_COL32(11, 109, 191, 255), ImU32 colorSelected = IM_COL32(81, 148, 204, 255)) {
 	this->color = color;
 	this->colorSelected = colorSelected;
@@ -147,10 +191,9 @@ bool UiNode::removeLink(int id) {
 json UiNode::serialize() {
 	json result;
 	result["id"] = id;
-	result["type"] = 0;
+	result["type"] = type_i;
 	result["inputs"] = inputs;
 	result["outputs"] = outputs;
-	result["links"] = json::array();
 
 	return result;
 }

@@ -36,10 +36,13 @@ public:
 	shared_ptr<UiNode> selectedNode = nullptr;
 	NodeEditor();
 	void save(const char* filename = "untitled1.json");
+	bool verify_link(const Link& link);
 	void load(const char* filename = "untitled1.json");
-	void addNode(const int& type);
+	void unpackNode(const json& json_node);
+	void addNode(const int& type, int id = -1, ImVec2 position = {0.0f, 0.0f});
 	void draw();
 	int getLinksSize();
+	void addLink(const int& beg, const int& end);
 	void DeleteNode(int nodeId);
 	~NodeEditor();
 };
