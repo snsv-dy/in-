@@ -72,6 +72,11 @@ bool NodeEditor::verify_link(const Link& link) {
 			nodes.count(link.endNode) == 1;
 }
 
+// Topological sort
+void topSort() {
+
+}
+
 void NodeEditor::load(const char* filename) {
 	ifstream in_file(filename);
 
@@ -106,10 +111,74 @@ void NodeEditor::load(const char* filename) {
 				}
 			}
 
+			refreshAll();
+
 		} catch (const json::parse_error& err) {
 			printf("Exception while reading file: %s\n", err.what());
 		}
 	}
+}
+
+// Temporary for loading
+// Currently only for single graph, if there are more graphs in editor
+// behaviour is not known.
+void NodeEditor::refreshAll() {
+
+	std::set<int> visited;
+	for (const auto& [id, link] : links) {
+		if (visited.count(link.begNode) == 0) {
+			visited.insert(link.begNode);
+		}
+	}
+
+	vector<int> last_nodes;
+
+	// Find last node in graph
+	for (const auto& [id, node] : nodes) {
+		if (visited.count(id) == 0) {
+			last_nodes.push_back(id);
+		}
+	}
+
+	printf("Last nodes: ");
+	for (int& id : last_nodes) {
+		printf("%d ", id);
+	}
+	printf("\n");
+
+	vector<int> stack;
+	vector<int> order;
+	for (const int& id : last_nodes) {
+		const shared_ptr<UiNode>& node = nodes[id];
+		stack.push_back(id);
+
+		while (!stack.empty()) {
+			const int id = stack.back();
+			stack.pop_back();
+			const shared_ptr<UiNode>& node = nodes[id];
+			bool isConnectedTo = false;
+			for (const Link& link : node->links) {
+				if (link.endNode == id) {
+					printf("%d <- %d\n", link.endNode, link.begNode);
+					isConnectedTo = true;
+					stack.push_back(link.begNode);
+				}
+			}
+
+			if (isConnectedTo) {
+				order.push_back(id);
+			}
+		}
+	}
+
+	reverse(order.begin(), order.end());
+
+	printf("Refresh order: ");
+	for (int& id : order) {
+		printf("%d ", id);
+		nodes[id]->generator->gen();
+	}
+	printf("\n");
 }
 
 void NodeEditor::unpackNode(const json& json_node) {

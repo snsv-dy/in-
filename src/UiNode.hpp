@@ -2,6 +2,7 @@
 #define _UINODE_HPP_
 
 // #include <cstdio>
+#include <sstream>
 #include <vector>
 #include <map>
 #include <memory>

@@ -78,7 +78,9 @@ void UiNode::draw() {
 
 	ImNodes::BeginNodeTitleBar();
 	// string 
-	ImGui::Text(generator->getName());
+	stringstream title;
+	title << generator->getName() << " [" << id << "]";
+	ImGui::Text(title.str().c_str());
 	ImNodes::EndNodeTitleBar();
 
 	int input_index = 1;
