@@ -36,9 +36,10 @@ class NodeEditor {
 public:
 	shared_ptr<UiNode> selectedNode = nullptr;
 	NodeEditor();
-	void save(const char* filename = "untitled1.json");
+	void reset();
+	void save(const string& filename = "untitled1.json");
 	bool verify_link(const Link& link);
-	void load(const char* filename = "untitled1.json");
+	void load(const string& filename = "untitled1.json");
 	void refreshAll();
 	void unpackNode(const json& json_node);
 	void addNode(const int& type, int id = -1, ImVec2 position = {0.0f, 0.0f});

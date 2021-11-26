@@ -6,6 +6,8 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
+#include <ImGuiFileDialog.h>
+
 #include <glad/glad.h>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -198,6 +200,37 @@ int opengl_context(GLFWwindow* window) {
 		UiNode* activeNode = nullptr;
 		if (node_editor.selectedNode != nullptr) {
 			activeNode = node_editor.selectedNode.get();
+		}
+
+		ImGui::BeginMainMenuBar();
+		if (ImGui::MenuItem("Otwórz")) {
+			ImGuiFileDialog::Instance()->OpenDialog("OpenProject", "Choose File", ".json,.*", ".");
+		}
+
+		if (ImGui::MenuItem("Zapisz jako", "CTRL+S")) {
+			ImGuiFileDialog::Instance()->OpenDialog("SaveProject", "Choose File", ".json,.*", ".", "", 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
+			printf("save\n");
+		}
+		// ImGui::MenuItem("Zapisz jako");
+		// ImGui::MenuItem("Ostatnie pliki");
+		ImGui::EndMainMenuBar();
+
+		if (ImGuiFileDialog::Instance()->Display("SaveProject")) {
+			if (ImGuiFileDialog::Instance()->IsOk()) {
+				printf("File choosed `%s`\n", ImGuiFileDialog::Instance()->GetFilePathName().c_str());
+				node_editor.save(ImGuiFileDialog::Instance()->GetFilePathName());
+			}
+
+			ImGuiFileDialog::Instance()->Close();
+		}
+
+		if (ImGuiFileDialog::Instance()->Display("OpenProject")) {
+			if (ImGuiFileDialog::Instance()->IsOk()) {
+				// printf("File choosed `%s`\n", ImGuiFileDialog::Instance()->GetFilePathName().c_str());
+				node_editor.load(ImGuiFileDialog::Instance()->GetFilePathName());
+			}
+
+			ImGuiFileDialog::Instance()->Close();
 		}
 
 		ImGui::Begin("Teren");

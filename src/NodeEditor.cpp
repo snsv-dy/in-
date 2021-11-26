@@ -23,8 +23,15 @@ NodeEditor::NodeEditor() {
 	// nodes.push_back(node2);
 }
 
+void NodeEditor::reset() {
+	links.clear();
+	nodes.clear();
+	current_id = 0;
+	links_id = 0;
+}
+
 // Dodaj jakieś komunikaty w gui w przypadku błędów przy zapisie/odczycie.
-void NodeEditor::save(const char* filename) {
+void NodeEditor::save(const string& filename) {
 	json json_data;
 
 	json json_nodes = json::array();
@@ -77,13 +84,15 @@ void topSort() {
 
 }
 
-void NodeEditor::load(const char* filename) {
+void NodeEditor::load(const string& filename) {
 	ifstream in_file(filename);
 
 	if (in_file.good()) {
 		json json_data;
 		try {
 			in_file >> json_data;
+
+			this->reset();
 
 			current_id = json_data["current_id"];
 			links_id = json_data["links_id"];
@@ -140,12 +149,6 @@ void NodeEditor::refreshAll() {
 		}
 	}
 
-	printf("Last nodes: ");
-	for (int& id : last_nodes) {
-		printf("%d ", id);
-	}
-	printf("\n");
-
 	vector<int> stack;
 	vector<int> order;
 	for (const int& id : last_nodes) {
@@ -159,7 +162,6 @@ void NodeEditor::refreshAll() {
 			bool isConnectedTo = false;
 			for (const Link& link : node->links) {
 				if (link.endNode == id) {
-					printf("%d <- %d\n", link.endNode, link.begNode);
 					isConnectedTo = true;
 					stack.push_back(link.begNode);
 				}
@@ -173,12 +175,9 @@ void NodeEditor::refreshAll() {
 
 	reverse(order.begin(), order.end());
 
-	printf("Refresh order: ");
 	for (int& id : order) {
-		printf("%d ", id);
 		nodes[id]->generator->gen();
 	}
-	printf("\n");
 }
 
 void NodeEditor::unpackNode(const json& json_node) {
