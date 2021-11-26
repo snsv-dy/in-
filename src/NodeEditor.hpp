@@ -43,6 +43,7 @@ public:
 	void refreshAll();
 	void unpackNode(const json& json_node);
 	void addNode(const int& type, int id = -1, ImVec2 position = {0.0f, 0.0f});
+	void debgz();
 	void draw();
 	int getLinksSize();
 	void addLink(const int& beg, const int& end);

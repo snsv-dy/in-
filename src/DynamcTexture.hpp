@@ -36,6 +36,7 @@ public:
 			glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
 		}
 		printf("Dynamc [%p] created\n", data);
+		clear();
 	}
 
 	void updateGL() {
@@ -56,6 +57,21 @@ public:
 		// }
 
 		updateGL();
+	}
+
+	void clear() {
+		for (int y = 0; y < height; y++) {
+			int yw = y * width;
+			for (int x = 0; x < width; x++) {
+				if (monochrome) {
+					data[yw + x] = 0.0f;
+				} else {
+					data[yw + x] = 0.0f;
+					data[yw + x + 1] = 0.0f;
+					data[yw + x + 2] = 0.0f;
+				}
+			}
+		}
 	}
 
 	pair<int, int> getSize() {

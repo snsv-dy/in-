@@ -28,6 +28,7 @@ void NodeEditor::reset() {
 	nodes.clear();
 	current_id = 0;
 	links_id = 0;
+	selectedNode = nullptr;
 }
 
 // Dodaj jakieś komunikaty w gui w przypadku błędów przy zapisie/odczycie.
@@ -225,6 +226,10 @@ void NodeEditor::addNode(const int& type, int id, ImVec2 position) {
 	nodes[node->id] = node;
 
 	ImNodes::SetNodeScreenSpacePos(node->id, position);
+}
+
+void NodeEditor::debgz() {
+	ImGui::Text("nodes size: %d", nodes.size());
 }
 
 void NodeEditor::draw() {

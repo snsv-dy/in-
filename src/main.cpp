@@ -189,6 +189,9 @@ int opengl_context(GLFWwindow* window) {
 	
 	ImGui::GetStyle().ScaleAllSizes(1.5f);
 
+	string project_name = "[untitled.json]";
+	glfwSetWindowTitle(window, project_name.c_str());
+
 	while (!glfwWindowShouldClose(window)) {
 		
 
@@ -214,24 +217,6 @@ int opengl_context(GLFWwindow* window) {
 		// ImGui::MenuItem("Zapisz jako");
 		// ImGui::MenuItem("Ostatnie pliki");
 		ImGui::EndMainMenuBar();
-
-		if (ImGuiFileDialog::Instance()->Display("SaveProject")) {
-			if (ImGuiFileDialog::Instance()->IsOk()) {
-				printf("File choosed `%s`\n", ImGuiFileDialog::Instance()->GetFilePathName().c_str());
-				node_editor.save(ImGuiFileDialog::Instance()->GetFilePathName());
-			}
-
-			ImGuiFileDialog::Instance()->Close();
-		}
-
-		if (ImGuiFileDialog::Instance()->Display("OpenProject")) {
-			if (ImGuiFileDialog::Instance()->IsOk()) {
-				// printf("File choosed `%s`\n", ImGuiFileDialog::Instance()->GetFilePathName().c_str());
-				node_editor.load(ImGuiFileDialog::Instance()->GetFilePathName());
-			}
-
-			ImGuiFileDialog::Instance()->Close();
-		}
 
 		ImGui::Begin("Teren");
 		ImVec2 pos = ImGui::GetWindowPos();
@@ -340,6 +325,7 @@ int opengl_context(GLFWwindow* window) {
 		ImGui::Text("cameraRotation: %2.2f %2.2f\n", cameraRotation.x, cameraRotation.y);
 		ImGui::Text("cameraOrigin: %2.2f %2.2f %2.2f\n", cameraOrigin.x, cameraOrigin.y, cameraOrigin.z);
 		ImGui::Text("cameraUp: %2.2f %2.2f %2.2f\n", cameraUp.x, cameraUp.y, cameraUp.z);
+		node_editor.debgz();
 		if (ImGui::Button("Save nodes")) {
 			node_editor.save();
 		}
@@ -354,6 +340,31 @@ int opengl_context(GLFWwindow* window) {
 		// sigen.drawGui();
 		if (activeNode != nullptr) {
 			activeNode->drawGui();
+		}
+
+		// File dialogs are here because they modify node editor state and set activeNode (selectedNode in NodeEditor) 
+		// to nullptr, and as a result program tries to use nonexistent object (not operating on raw pointer here in main
+		// would probably fixed that too).
+		if (ImGuiFileDialog::Instance()->Display("SaveProject")) {
+			if (ImGuiFileDialog::Instance()->IsOk()) {
+				printf("File choosed `%s`\n", ImGuiFileDialog::Instance()->GetFilePathName().c_str());
+				node_editor.save(ImGuiFileDialog::Instance()->GetFilePathName());
+				project_name = "[" + ImGuiFileDialog::Instance()->GetCurrentFileName() + "]";
+				glfwSetWindowTitle(window, project_name.c_str());
+			}
+
+			ImGuiFileDialog::Instance()->Close();
+		}
+
+		if (ImGuiFileDialog::Instance()->Display("OpenProject")) {
+			if (ImGuiFileDialog::Instance()->IsOk()) {
+				// printf("File choosed `%s`\n", ImGuiFileDialog::Instance()->GetFilePathName().c_str());
+				node_editor.load(ImGuiFileDialog::Instance()->GetFilePathName());
+				project_name = "[" + ImGuiFileDialog::Instance()->GetCurrentFileName() + "]";
+				glfwSetWindowTitle(window, project_name.c_str());
+			}
+
+			ImGuiFileDialog::Instance()->Close();
 		}
 
 		ImGui::End();

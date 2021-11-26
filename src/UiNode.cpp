@@ -1,10 +1,14 @@
 #include "UiNode.hpp"
 
+int nodes_num = 0;
+
 UiNode::UiNode(unique_ptr<Generator> generator, bool monochromeTexture = true): dynamc{texWidth, texWidth, monochromeTexture}, generator{move(generator)} {
 // generator{make_unique<SinGenerator>(&dynamc, texWidth, texWidth)} {
 	this->generator->setTexture(&dynamc);
 
 	this->generator->gen();
+	nodes_num++;
+	printf("[C]Nodes_num: %d\n", nodes_num);
 }
 
 UiNode::UiNode(const json& json_data): dynamc{texWidth, texWidth, json_data["type"] != 3} {
@@ -50,6 +54,8 @@ UiNode::UiNode(const json& json_data): dynamc{texWidth, texWidth, json_data["typ
 
 	this->setColors(color, colorSelected);
 	this->generator->gen();
+	nodes_num++;
+	printf("[C]Nodes_num: %d\n", nodes_num);
 }
 
 void UiNode::setColors(ImU32 color = IM_COL32(11, 109, 191, 255), ImU32 colorSelected = IM_COL32(81, 148, 204, 255)) {
@@ -203,5 +209,7 @@ json UiNode::serialize() {
 }
 
 UiNode::~UiNode() {
+	nodes_num--;
 	printf("Removing node: %d\n", id);
+	printf("[D]Nodes_num: %d\n", nodes_num);
 }
