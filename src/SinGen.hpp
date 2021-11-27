@@ -21,7 +21,7 @@ public:
 	SinGenerator() {
 	}
 
-	void drawGui() {
+	bool drawGui() {
 		bool changed = false;
 		changed |= ImGui::DragFloat("Amplitude", &amplitude, 0.01f);
 		changed |= ImGui::DragFloat("Period", &period, 0.1f);
@@ -32,6 +32,8 @@ public:
 		if (changed) {
 			gen();
 		}
+
+		return changed;
 	}
 
 	// void setTexture(DynamcTexture* dynamc1) {

@@ -63,8 +63,8 @@ void UiNode::setColors(ImU32 color = IM_COL32(11, 109, 191, 255), ImU32 colorSel
 	this->colorSelected = colorSelected;
 }
 
-void UiNode::drawGui() {
-	generator->drawGui();
+bool UiNode::drawGui() {
+	bool params_changed = generator->drawGui();
 	ImGui::Text("Debug information");
 	ImGui::Text("Node id: %d", id);
 	ImGui::Text("Links %d", links.size());
@@ -72,6 +72,8 @@ void UiNode::drawGui() {
 		ImGui::Text("id: %d, beg: %d, end: %d, bNode: %d, eNode: %d\n", 
 					link.id, link.beg, link.end, link.begNode, link.endNode);
 	}
+
+	return params_changed;
 }
 
 void UiNode::draw() {

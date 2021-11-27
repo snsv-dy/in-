@@ -31,28 +31,36 @@ public:
 
 	CombineFunctions func = CombineFunctions::ADD;
 
-	void drawGui() {
+	bool drawGui() {
+		bool changed = false;
 		ImGui::Text("Sup.\n");
 
 		if (ImGui::RadioButton("Add", func == CombineFunctions::ADD)) {
 			func = CombineFunctions::ADD;
+			changed = true;
 		} 
 		
 		if (ImGui::RadioButton("Subtract", func == CombineFunctions::SUBTRACT)) {
 			func = CombineFunctions::SUBTRACT;
+			changed = true;
 		}
 
 		if (ImGui::RadioButton("Multiply", func == CombineFunctions::MULTIPLY)) {
 			func = CombineFunctions::MULTIPLY;
+			changed = true;
 		}
 
 		if (ImGui::RadioButton("Divide", func == CombineFunctions::DIVIDE)) {
 			func = CombineFunctions::DIVIDE;
+			changed = true;
 		}
 
 		if (ImGui::Button("generate")) {
 			gen();
+			changed = true;
 		}
+
+		return changed;
 	}
 
 	void gen() {

@@ -45,6 +45,7 @@ public:
 	void addNode(const int& type, int id = -1, ImVec2 position = {0.0f, 0.0f});
 	void debgz();
 	void draw();
+	void nodeChanged(const int& node_id);
 	int getLinksSize();
 	void addLink(const int& beg, const int& end);
 	void DeleteNode(int nodeId);

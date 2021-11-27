@@ -15,7 +15,7 @@ protected:
 	int width = 512;
 	int height = width;
 public:
-	virtual void drawGui() =0;
+	virtual bool drawGui() =0;
 	virtual void gen() =0;
 
 	virtual void setTexture(DynamcTexture* dynamc) {

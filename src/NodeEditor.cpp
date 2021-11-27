@@ -174,6 +174,12 @@ void NodeEditor::refreshAll() {
 		}
 	}
 
+	printf("Last nodes: ");
+	for (int in : last_nodes) {
+		printf("%d ", in);
+	}
+	printf("\n");
+
 	reverse(order.begin(), order.end());
 
 	for (int& id : order) {
@@ -457,7 +463,33 @@ void NodeEditor::addLink(const int& beg, const int& end) {
 		end_node->addLink(link);
 
 		printf("link[%d]! %d %d\n", links.size() - 1, beg, end);
+		nodeChanged(beg_node->id);
 	}
+}
+
+void NodeEditor::nodeChanged(const int& node_id) {
+	set<int> visited;
+	vector<int> stack;
+	stack.push_back(node_id);
+
+	printf("%d changed, updating nodes: ", node_id);
+	while (!stack.empty()) {
+		int id = stack.back();
+		stack.pop_back();
+
+		if (visited.count(id) == 0) {
+			visited.insert(id);
+			const shared_ptr<UiNode>& node = nodes[id];
+			for (const Link& link : node->links) {
+				if (link.begNode == id) {
+					stack.push_back(link.endNode);
+				}
+			}
+			nodes[id]->generator->gen();
+		}
+	}
+
+	printf("\n");
 }
 
 void NodeEditor::DeleteNode(int nodeId) {

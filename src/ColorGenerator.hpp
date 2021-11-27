@@ -26,9 +26,8 @@ public:
 		{0.9f, {1.0f, 1.0f, 1.0f, 1.0f}},
 	};
 
-	void drawGui() {
-		ImGui::Text("Sup.\n");
-		
+	bool drawGui() {
+		bool changed = false;
 		ImGui::BeginTable("colors", 4);
 		for (int i = 0; i < colorSteps.size(); i++) {
 			colorStep& step = colorSteps[i];
@@ -50,16 +49,18 @@ public:
 			ImGui::TableSetColumnIndex(0);
 			if (ImGui::SliderFloat("Elevation", &step.threshold, 0.0f, 1.0f)) {
 				// colorSteps[i].first = new_value;
+				changed = true;
 			}
 
 			// float tcolor[3] = {stop.color.x, color.y, color.z};
 			ImGui::TableSetColumnIndex(1);
-			ImGui::ColorEdit3("Color", (float*)&step.color);
+			changed |= ImGui::ColorEdit3("Color", (float*)&step.color);
 
 			ImGui::TableSetColumnIndex(2);
 			if (colorSteps.size() > 1 && ImGui::Button("x")) {
 				colorSteps.erase(colorSteps.begin() + i);
 				i--;
+				changed = true;
 			}
 
 			ImGui::EndGroup();
@@ -68,6 +69,7 @@ public:
 			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
 				ImGui::SetDragDropPayload("COLOR_STOP", &i, sizeof(int));
 				ImGui::EndDragDropSource();
+				changed = true;
 			}
 
 			if (ImGui::BeginDragDropTarget()) {
@@ -79,6 +81,7 @@ public:
 						colorStep t = colorSteps[i];
 						colorSteps[i] = colorSteps[payload_index];
 						colorSteps[payload_index] = t;
+						changed = true;
 					}
 				}
 				ImGui::EndDragDropTarget();
@@ -88,11 +91,14 @@ public:
 
 		if (ImGui::Button("Add color")) {
 			colorSteps.push_back({1.0f, {0.0f, 0.0f, 0.0f, 1.0f}});
+			changed = true;
 		}
 
 		if (ImGui::Button("generate")) {
 			gen();
 		}
+
+		return changed;
 	}
 
 	void gen() {

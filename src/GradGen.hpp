@@ -22,7 +22,7 @@ public:
 
 	}
 
-	void drawGui() {
+	bool drawGui() {
 		bool changed = false;
 		changed |= ImGui::DragFloat("Height", &amp, 0.01f);
 		changed |= ImGui::DragFloat("Radius", &radius, 1.0f);
@@ -32,6 +32,8 @@ public:
 		if (changed) {
 			gen();
 		}
+
+		return changed;
 	}
 	
 	float distance(float x1, float y1, float x2, float y2) {

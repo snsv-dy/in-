@@ -50,6 +50,7 @@ struct UiNode {
 	vector<int> inputs;
 	vector<int> outputs;
 	vector<Link> links;
+	vector<int> dependant_nodes;
 	int output;
 
     float value = 0.0f;
@@ -65,7 +66,7 @@ struct UiNode {
 	UiNode(const json& json_data);
 
 	void setColors(ImU32 color, ImU32 colorSelected);
-	void drawGui();
+	bool drawGui();
 	void draw();
 	bool hasInput(int id);
 	bool hasOutput(int id);

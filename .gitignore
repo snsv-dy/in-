@@ -1,3 +1,4 @@
 include/
 *.o
 *.ini
+*.json

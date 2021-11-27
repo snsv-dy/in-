@@ -339,7 +339,9 @@ int opengl_context(GLFWwindow* window) {
 		// }
 		// sigen.drawGui();
 		if (activeNode != nullptr) {
-			activeNode->drawGui();
+			if (activeNode->drawGui()) {
+				node_editor.nodeChanged(activeNode->id);
+			}
 		}
 
 		// File dialogs are here because they modify node editor state and set activeNode (selectedNode in NodeEditor) 
