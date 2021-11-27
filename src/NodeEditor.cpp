@@ -347,14 +347,17 @@ void NodeEditor::draw() {
 		printf("doubleclicked node: %d\n", node_id);
 	}
 
+	
 	// Removing nodes
 	if (ImGui::IsKeyPressed(GLFW_KEY_DELETE)) {
+		set<int> nodes_to_update;
+
 		int n_nodes_selected = ImNodes::NumSelectedNodes();
 		if (n_nodes_selected > 0) {
 			vector<int> node_ids;
 			node_ids.resize(n_nodes_selected);
 			
-			ImNodes::GetSelectedNodes(node_ids.data());
+			ImNodes::GetSelectedNodes(node_ids.data());	
 			printf("Selected nods: ");
 			for (int node_id : node_ids) {
 				// Deleting node
@@ -373,7 +376,7 @@ void NodeEditor::draw() {
 						Link& link = (*node_links)[i];
 
 						nodes_linking_to.push_back({link.begNode == node_id ? link.endNode : link.begNode, link.id});
-						ImNodes::ClearLinkSelection(link.id);
+						// ImNodes::ClearLinkSelection(link.id);
 						links.erase(link.id);
 						// auto iter = std::find_if(links.begin(), links.end(), [_link_id](const Link& link) -> bool {
 						// 		return link.id == _link_id;
@@ -396,6 +399,7 @@ void NodeEditor::draw() {
 
 				for (const auto& [node_id, link_id] : nodes_linking_to) {
 					if (auto node_pair = nodes.find(node_id); node_pair != nodes.end()) {
+						nodes_to_update.insert(node_id);
 						node_pair->second->removeLink(link_id);
 					}
 				}
@@ -425,6 +429,16 @@ void NodeEditor::draw() {
 					links.erase(link.id);
 				}
 				ImNodes::ClearLinkSelection(link_id);
+			}
+		}
+
+		// This is unoptimized because some nodes might be refreshed twice.
+		// To optimize this you would somehow sort nodes like in loading.
+		// But sorting in loading is still weird and won't work 
+		// there are loops in graph (there shouldn't be any by the way).
+		for (const int& id : nodes_to_update) {
+			if (auto node_pair = nodes.find(id); node_pair != nodes.end()) {
+				nodeChanged(id);
 			}
 		}
 	}
@@ -467,6 +481,7 @@ void NodeEditor::addLink(const int& beg, const int& end) {
 	}
 }
 
+// Change dfs to bfs here
 void NodeEditor::nodeChanged(const int& node_id) {
 	set<int> visited;
 	vector<int> stack;
