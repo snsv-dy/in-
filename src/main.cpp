@@ -293,12 +293,7 @@ int opengl_context(GLFWwindow* window) {
 				glBindTexture(GL_TEXTURE_2D, activeNode->dynamc.texture);
 			} else {
 				ColorGenerator* generator = (ColorGenerator*)activeNode->generator.get();
-				
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, generator->input1->texture);
-
-				glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_2D, activeNode->dynamc.texture);
+				generator->bindTextures();
 			}
 		} else {
 			glBindTexture(GL_TEXTURE_2D, 0);
@@ -340,7 +335,7 @@ int opengl_context(GLFWwindow* window) {
 		// sigen.drawGui();
 		if (activeNode != nullptr) {
 			if (activeNode->drawGui()) {
-				node_editor.nodeChanged(activeNode->id);
+				node_editor.nodesChanged({activeNode->id});
 			}
 		}
 

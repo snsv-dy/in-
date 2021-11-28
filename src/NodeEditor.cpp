@@ -331,6 +331,7 @@ void NodeEditor::draw() {
 				if (nremoved != 1) {
 					printf("\t\tnremoved != 2\n");
 				}
+				nodesChanged({link.endNode});
 				links.erase(destroyId);
 			} else {
 				printf("Could not unset node\n");
@@ -375,6 +376,10 @@ void NodeEditor::draw() {
 					for (int i = 0; i < node_links->size(); i++) {
 						Link& link = (*node_links)[i];
 
+						if (link.begNode == node_id) {
+							nodes_to_update.insert(link.endNode);
+						}
+
 						nodes_linking_to.push_back({link.begNode == node_id ? link.endNode : link.begNode, link.id});
 						// ImNodes::ClearLinkSelection(link.id);
 						links.erase(link.id);
@@ -399,7 +404,6 @@ void NodeEditor::draw() {
 
 				for (const auto& [node_id, link_id] : nodes_linking_to) {
 					if (auto node_pair = nodes.find(node_id); node_pair != nodes.end()) {
-						nodes_to_update.insert(node_id);
 						node_pair->second->removeLink(link_id);
 					}
 				}
@@ -426,6 +430,7 @@ void NodeEditor::draw() {
 						node_pair->second->removeLink(link_id);
 					}
 
+					nodes_to_update.insert(link.endNode);
 					links.erase(link.id);
 				}
 				ImNodes::ClearLinkSelection(link_id);
@@ -436,11 +441,20 @@ void NodeEditor::draw() {
 		// To optimize this you would somehow sort nodes like in loading.
 		// But sorting in loading is still weird and won't work 
 		// there are loops in graph (there shouldn't be any by the way).
+		
+		set<int> visited;
+		vector<int> queue;
+		// queue.push_back(node_id);
+		
 		for (const int& id : nodes_to_update) {
 			if (auto node_pair = nodes.find(id); node_pair != nodes.end()) {
-				nodeChanged(id);
+				// nodesChanged(id);
+				queue.push_back(id);
 			}
 		}
+
+		nodesChanged(queue);
+
 	}
 }
 
@@ -477,33 +491,59 @@ void NodeEditor::addLink(const int& beg, const int& end) {
 		end_node->addLink(link);
 
 		printf("link[%d]! %d %d\n", links.size() - 1, beg, end);
-		nodeChanged(beg_node->id);
+		nodesChanged({beg_node->id});
 	}
 }
 
-// Change dfs to bfs here
-void NodeEditor::nodeChanged(const int& node_id) {
-	set<int> visited;
-	vector<int> stack;
-	stack.push_back(node_id);
+// Updated nodes so that no node will be updated twice and in wrong order.
+void NodeEditor::nodesChanged(const vector<int> node_ids) {
+	set<int> order_visited;
+	list<int> order;
 
-	printf("%d changed, updating nodes: ", node_id);
-	while (!stack.empty()) {
-		int id = stack.back();
-		stack.pop_back();
+	//
+	// Bfs here
+	for (const int& current_id : node_ids) {
+		set<int> local_visited;
+		queue<int> local_queue;
+		local_queue.push(current_id);
 
-		if (visited.count(id) == 0) {
-			visited.insert(id);
-			const shared_ptr<UiNode>& node = nodes[id];
-			for (const Link& link : node->links) {
-				if (link.begNode == id) {
-					stack.push_back(link.endNode);
+		printf("%d bfs, updating nodes: ", current_id);
+		while (!local_queue.empty()) {
+			int id = local_queue.front();
+			local_queue.pop();
+
+			if (local_visited.count(id) == 0) {
+				printf("%d ", id);
+				local_visited.insert(id);
+
+				const shared_ptr<UiNode>& node = nodes[id];
+				for (const Link& link : node->links) {
+					if (link.begNode == id) {
+						local_queue.push(link.endNode);
+					}
 				}
+			} 
+			
+			if (order_visited.count(id) == 1) {
+				// Change order so this node will be updated later.
+				order.erase(find(order.begin(), order.end(), id));
+				order.push_back(id);
+			} else {
+				order.push_back(id);
 			}
-			nodes[id]->generator->gen();
+
+			order_visited.insert(id);
 		}
 	}
 
+	printf("\n");
+
+	printf("Order of nodes: ");
+	for (int id : order) {
+		const shared_ptr<UiNode>& node = nodes[id];
+		node->generator->gen();
+		printf("%d ", id);
+	}
 	printf("\n");
 }
 

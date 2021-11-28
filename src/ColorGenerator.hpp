@@ -189,6 +189,19 @@ public:
 			});
 		}
 	}
+
+	void bindTextures() {
+		glActiveTexture(GL_TEXTURE0);
+		int heightTexture = 0;
+		if (input1 != nullptr) {
+			heightTexture = input1->texture;
+		} 
+
+		glBindTexture(GL_TEXTURE_2D, heightTexture);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, dynamc->texture);
+	}
 };
 
 #endif

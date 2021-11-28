@@ -69,6 +69,8 @@ public:
 				copyInput(input1 != nullptr ? input1 : input2);
 			} else if (input1 != nullptr && input2 != nullptr) {
 				combine();
+			} else {
+				dynamc->clear();
 			}
 			dynamc->updateGL();
 		}
