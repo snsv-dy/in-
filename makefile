@@ -8,7 +8,7 @@ OBJ_DIR = bin
 VPATH = include/glad include/imnodes src
 
 EXECUTABLE = prog
-SRC = main.cpp include/glad/glad.c Shader.cpp NodeEditor.cpp UiNode.cpp
+SRC = main.cpp include/glad/glad.c Shader.cpp NodeEditor.cpp UiNode.cpp Preview.cpp
 LOCAL_OBJS = $(addsuffix .o, $(basename $(notdir $(SRC))))
 LOCAL_OBJS := $(LOCAL_OBJS:%.o=$(OBJ_DIR)/%.o)
 

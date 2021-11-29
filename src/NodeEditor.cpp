@@ -238,22 +238,51 @@ void NodeEditor::debgz() {
 	ImGui::Text("nodes size: %d", nodes.size());
 }
 
-void NodeEditor::draw() {
+void NodeEditor::draw(bool* new_preview) {
+	if (new_preview != nullptr) {
+		*new_preview = false;
+	}
+
 	ImGui::Begin("Nodes");
 	ImNodes::BeginNodeEditor();
 
 	const bool node_add_popup = ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) &&
 								ImNodes::IsEditorHovered() &&
 								ImGui::IsMouseReleased(1);
-	
+	bool right_click = false;
 	if (ImGui::IsAnyItemHovered && node_add_popup) {
 		ImGui::OpenPopup("Add node");
+		right_click = true;
 	} 
 	// else {
 	// 	printf("no popup: %d %d %d %d\n", !ImGui::IsAnyItemHovered(), ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows),
 	// 						ImNodes::IsEditorHovered(),
 	// 						ImGui::IsMouseReleased(2));
 	// }
+
+
+	//
+	// Drawing nodes
+	//
+	const float node_width = 100.0f;
+	// for (shared_ptr<UiNode>& node : nodes) {
+	// for (map<int, UiNode>::iterator it = nodes.begin(); it != nodes.end(); it++) {
+	for (auto& [id, node] : nodes) {
+		if (node->draw()) {
+			previewedNodes.insert(id);
+			if (new_preview != nullptr) {
+				*new_preview = true;
+			}
+		}
+	}
+	// ImNodes::MiniMap();
+
+	// Drawing links between nodes
+	int link_i = 0;
+	for (const auto& [id, link] : links) {
+		ImNodes::Link(id, link.beg, link.end);
+	}
+
 
 	if (ImGui::BeginPopup("Add node")) {
 		const ImVec2 mouse_pos = ImGui::GetMousePosOnOpeningCurrentPopup();
@@ -289,25 +318,17 @@ void NodeEditor::draw() {
 		ImGui::EndPopup();
 	}
 
-	//
-	// Drawing nodes
-	//
-	const float node_width = 100.0f;
-	// for (shared_ptr<UiNode>& node : nodes) {
-	// for (map<int, UiNode>::iterator it = nodes.begin(); it != nodes.end(); it++) {
-	for (auto& [id, node] : nodes) {
-		node->draw();
-	}
-	// ImNodes::MiniMap();
-
-	// Drawing links between nodes
-	int link_i = 0;
-	for (const auto& [id, link] : links) {
-		ImNodes::Link(id, link.beg, link.end);
-	}
 
 	ImNodes::EndNodeEditor();
 	
+	int n_nodes_selected = ImNodes::NumSelectedNodes();
+	if (n_nodes_selected > 0 && right_click) {
+		printf("nodes selected > 0\n");
+		// ImGui::MenuItem("Nodes selected: > 0");
+		// vector<int> node_ids;
+		// node_ids.resize(n_nodes_selected);
+	}
+
 	int beg, end;
 	if (ImNodes::IsLinkCreated(&beg, &end)) {
 		addLink(beg, end);
@@ -557,6 +578,14 @@ void NodeEditor::DeleteNode(int nodeId) {
 
 int NodeEditor::getLinksSize() {
 	return links.size();
+}
+
+shared_ptr<UiNode> NodeEditor::getNode(const int& id) {
+	if (auto it = nodes.find(id); it != nodes.end()) {
+		return it->second;
+	}
+
+	return nullptr;
 }
 
 NodeEditor::~NodeEditor() {

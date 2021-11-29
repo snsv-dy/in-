@@ -1,4 +1,4 @@
-	#ifndef _DYNAMC_TEXTURE_HPP_
+#ifndef _DYNAMC_TEXTURE_HPP_
 #define _DYNAMC_TEXTURE_HPP_
 
 #include <glad/glad.h>

@@ -76,7 +76,7 @@ bool UiNode::drawGui() {
 	return params_changed;
 }
 
-void UiNode::draw() {
+bool UiNode::draw() {
 	const float node_width = 100.0f;
 	ImNodes::PushColorStyle(ImNodesCol_TitleBar, color);
 	ImNodes::PushColorStyle(ImNodesCol_TitleBarSelected, colorSelected);
@@ -101,31 +101,17 @@ void UiNode::draw() {
 		ImNodes::EndInputAttribute();
 	}
 
-	// if (generator->hasInput()) {
-		
-
-	// 	ImNodes::BeginInputAttribute(input);
-	// 	ImGui::Text("Test");
-	// 	ImGui::SameLine();
-	// 	ImGui::PushItemWidth(node_width);
-	// 	ImGui::DragFloat("##hidelabel", &value, 0.01f, 0.0f, 1.0f);
-	// 	ImGui::PopItemWidth();
-	// 	ImNodes::EndInputAttribute();
-	// }
-
 	int output_index = 1;
 	for (const int& o : outputs) {
-		// ImNodes::BeginInputAttribute(i);
-		// ImGui::PushItemWidth(node_width);
-		// ImGui::Text("input %d", i);
-		// // ImGui::DragFloat("##hidelabel", &value, 0.01f, 0.0f, 1.0f);
-		// ImGui::PopItemWidth();
-		// ImNodes::EndInputAttribute();
-
 		ImNodes::BeginOutputAttribute(o);
 		ImGui::Indent(40);
 		ImGui::Text("output %d", output_index++);
 		ImNodes::EndOutputAttribute();
+	}
+
+	bool displaySeparatePreview = false;
+	if (ImGui::Button("Preview") && !preview) {
+		displaySeparatePreview = true;
 	}
 
 	ImNodes::EndNode();
@@ -133,6 +119,8 @@ void UiNode::draw() {
 	ImNodes::PopColorStyle();
 	ImNodes::PopColorStyle();
 	ImNodes::PopColorStyle();
+
+	return displaySeparatePreview;
 }
 
 bool UiNode::hasInput(int id) {

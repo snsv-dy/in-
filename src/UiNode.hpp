@@ -58,6 +58,7 @@ struct UiNode {
 	const int texWidth = 512;
 	DynamcTexture dynamc;
 	unique_ptr<Generator> generator;
+	bool preview = false;
 
 	ImU32 color = NODE_COLOR_DEFAULT;
 	ImU32 colorSelected = NODE_COLOR_DEFAULT_SELECTED;
@@ -67,7 +68,7 @@ struct UiNode {
 
 	void setColors(ImU32 color, ImU32 colorSelected);
 	bool drawGui();
-	void draw();
+	bool draw();
 	bool hasInput(int id);
 	bool hasOutput(int id);
 	bool giveInput(int id, DynamcTexture* dynamc);

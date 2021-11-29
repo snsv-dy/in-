@@ -36,6 +36,7 @@ class NodeEditor {
 	int current_id = 0;
 	int links_id = 0;
 public:
+	set<int> previewedNodes;
 	shared_ptr<UiNode> selectedNode = nullptr;
 	NodeEditor();
 	void reset();
@@ -46,11 +47,12 @@ public:
 	void unpackNode(const json& json_node);
 	void addNode(const int& type, int id = -1, ImVec2 position = {0.0f, 0.0f});
 	void debgz();
-	void draw();
+	void draw(bool* new_preview);
 	void nodesChanged(const vector<int> node_id);
 	int getLinksSize();
 	void addLink(const int& beg, const int& end);
 	void DeleteNode(int nodeId);
+	shared_ptr<UiNode> getNode(const int& id);
 	~NodeEditor();
 };
 

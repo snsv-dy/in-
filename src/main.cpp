@@ -26,10 +26,12 @@
 
 #include "NodeEditor.hpp"
 #include "Shader.hpp"
-#include "DynamcTexture.hpp"
-#include "SinGen.hpp"
-#include "GradGen.hpp"
-#include "ColorGenerator.hpp"
+// #include "DynamcTexture.hpp"
+// #include "SinGen.hpp"
+// #include "GradGen.hpp"
+// #include "ColorGenerator.hpp"
+
+#include "Preview.hpp"
 
 int screen_width = 1200;
 int screen_height = 1000;
@@ -192,6 +194,10 @@ int opengl_context(GLFWwindow* window) {
 	string project_name = "[untitled.json]";
 	glfwSetWindowTitle(window, project_name.c_str());
 
+	Preview default_preview;
+	Preview second_preview;
+	map<int, shared_ptr<Preview>> previews;
+
 	while (!glfwWindowShouldClose(window)) {
 		
 
@@ -268,14 +274,14 @@ int opengl_context(GLFWwindow* window) {
 		//
 		//
 
-		//
-		// 3d drawing
-		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-		glEnable(GL_DEPTH_TEST);
-		glViewport(0, 0, fb_size, fb_size);
+		// //
+		// // 3d drawing
+		// glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		// glEnable(GL_DEPTH_TEST);
+		// glViewport(0, 0, fb_size, fb_size);
 
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		shader.use();
 		glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
@@ -284,32 +290,102 @@ int opengl_context(GLFWwindow* window) {
 
 		glUniform1i(heightLocation, 0);
 		glUniform1i(colorLocation, 1);
-		// glBindTexture(GL_TEXTURE_2D, heightmap_texture);
-		if (activeNode != nullptr) {
-			glUniform1i(colorFlagLocation, !activeNode->dynamc.monochrome);
+		default_preview.draw(node_editor.selectedNode, colorFlagLocation, VAO, gridTrigCount);
+		// // glBindTexture(GL_TEXTURE_2D, heightmap_texture);
+		// if (activeNode != nullptr) {
+		// 	glUniform1i(colorFlagLocation, !activeNode->dynamc.monochrome);
 
-			if (activeNode->dynamc.monochrome) {
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, activeNode->dynamc.texture);
-			} else {
-				ColorGenerator* generator = (ColorGenerator*)activeNode->generator.get();
-				generator->bindTextures();
-			}
-		} else {
-			glBindTexture(GL_TEXTURE_2D, 0);
-		}
+		// 	if (activeNode->dynamc.monochrome) {
+		// 		glActiveTexture(GL_TEXTURE0);
+		// 		glBindTexture(GL_TEXTURE_2D, activeNode->dynamc.texture);
+		// 	} else {
+		// 		ColorGenerator* generator = (ColorGenerator*)activeNode->generator.get();
+		// 		generator->bindTextures();
+		// 	}
+		// } else {
+		// 	glBindTexture(GL_TEXTURE_2D, 0);
+		// }
 
-		glBindVertexArray(VAO);
-		// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glDrawArrays(GL_TRIANGLES, 0, gridTrigCount * 3);
-		// glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		// glBindVertexArray(VAO);
+		// // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		// glDrawArrays(GL_TRIANGLES, 0, gridTrigCount * 3);
+		// // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		// 3d drawing end
-		//
+		// glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		// // 3d drawing end
+		// //
 
-		ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)fbTexture, ImVec2(pos.x, pos.y), ImVec2(pos.x + size.x, pos.y + size.y), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
+		ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)default_preview.fbTexture, ImVec2(pos.x, pos.y), ImVec2(pos.x + size.x, pos.y + size.y), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
+		
+		// if (!node_editor.previewedNodes.empty()) {
+		// 	for (const int& id : node_editor.previewedNodes) {
+		// 		char name[100] = "";
+		// 		sprintf(name, "texure %d", id);
+		// 		const char* window_id = (const char*)name;
+
+		// 		// Turns out, windows should'n be created this way.
+		// 		ImGui::Begin(window_id);
+		// 		pos = ImGui::GetWindowPos();
+		// 		size = ImGui::GetWindowSize();
+		// 		int img_size = size.x < size.y ? size.x : size.y;
+		// 		pos.x += size.y < size.x ? (size.x - size.y) / 2 : 0;
+		// 		pos.y += size.x < size.y ? (size.y - size.x) / 2 : 0;
+		// 		shared_ptr<UiNode> node = node_editor.getNode(id);
+
+		// 		// ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)node->dynamc.texture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
+		// 		ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)fbTexture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
+		// 		ImGui::Text("texture %d", id);
+		// 		ImGui::End();
+		// 	}
+		// }
+
 		ImGui::End();
+
+		if (!node_editor.previewedNodes.empty()) {
+			for (const int& id : node_editor.previewedNodes) {
+				if (previews.find(id) == previews.end()) {
+					continue;
+				}
+
+				char name[100] = "";
+				sprintf(name, "texure %d", id);
+				const char* window_id = (const char*)name;
+				shared_ptr<UiNode> node = node_editor.getNode(id);
+
+				// Turns out, windows should'n be created this way.
+				bool closed = ImGui::Begin(window_id, &node->preview);
+				if (!node->preview) {
+					// previews.erase(id);
+					// node_editor.previewedNodes.erase(id);
+				}
+
+				pos = ImGui::GetWindowPos();
+				size = ImGui::GetWindowSize();
+				int img_size = size.x < size.y ? size.x : size.y;
+				pos.x += size.y < size.x ? (size.x - size.y) / 2 : 0;
+				pos.y += size.x < size.y ? (size.y - size.x) / 2 : 0;
+
+				shader.use();
+				glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
+				glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
+				glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model));
+
+				glUniform1i(heightLocation, 0);
+				glUniform1i(colorLocation, 1);
+
+				if (previews.find(id) != previews.end()) {
+					shared_ptr<Preview> preview = previews[id];
+					preview->draw(node, colorFlagLocation, VAO, gridTrigCount);
+
+					// ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)node->dynamc.texture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
+					ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)preview->fbTexture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
+				} else {
+					ImGui::Text("No preview");
+				}
+				ImGui::Text("texture %d", id);
+				ImGui::End();
+			}
+		}
 
 		ImGui::Begin("Paramz");
 		ImGui::Text("pos: %f %f", pos.x, pos.y);
@@ -368,12 +444,24 @@ int opengl_context(GLFWwindow* window) {
 
 		//
 		// Node editor
-		node_editor.draw();
+		bool new_preview = false;
+		node_editor.draw(&new_preview);
+
+		if (new_preview) {
+			for (const int id : node_editor.previewedNodes) {
+				if (auto it = previews.find(id); it == previews.end()) {
+					shared_ptr<Preview> preview = make_shared<Preview>();
+					previews[id] = preview;
+				} else {
+					printf("Found preview %d\n", id);
+				}
+			}
+		}
 		//
 		//
 
 		ImGui::End();
-
+		
 		ImGui::Begin("Texture preview");
 		pos = ImGui::GetWindowPos();
 		size = ImGui::GetWindowSize();
@@ -387,6 +475,27 @@ int opengl_context(GLFWwindow* window) {
 			ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)activeNode->dynamc.texture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
 		}
 		ImGui::End();
+
+		// if (!node_editor.previewedNodes.empty()) {
+		// 	for (const int& id : node_editor.previewedNodes) {
+		// 		char name[100] = "";
+		// 		sprintf(name, "texure %d", id);
+		// 		const char* window_id = (const char*)name;
+
+		// 		// Turns out, windows should'n be created this way.
+		// 		ImGui::Begin(window_id);
+		// 		pos = ImGui::GetWindowPos();
+		// 		size = ImGui::GetWindowSize();
+		// 		int img_size = size.x < size.y ? size.x : size.y;
+		// 		pos.x += size.y < size.x ? (size.x - size.y) / 2 : 0;
+		// 		pos.y += size.x < size.y ? (size.y - size.x) / 2 : 0;
+		// 		shared_ptr<UiNode> node = node_editor.getNode(id);
+		// 		// ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)node->dynamc.texture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
+		// 		ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)fbTexture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
+		// 		ImGui::Text("texture %d", id);
+		// 		ImGui::End();
+		// 	}
+		// }
 		
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
