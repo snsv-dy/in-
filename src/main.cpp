@@ -359,12 +359,17 @@ int opengl_context(GLFWwindow* window) {
 				// Turns out, windows should'n be created this way.
 				bool opened = true;
 				bool closed = ImGui::Begin(window_id, &opened);
-
-				pos = ImGui::GetWindowPos();
-				size = ImGui::GetWindowSize();
+				ImVec2 size = ImGui::GetContentRegionAvail();
+				size.x *= 0.5f;
+				// size.y *= 0.5f;
 				int img_size = size.x < size.y ? size.x : size.y;
 				pos.x += size.y < size.x ? (size.x - size.y) / 2 : 0;
 				pos.y += size.x < size.y ? (size.y - size.x) / 2 : 0;
+
+				ImGui::BeginChild("3d", {img_size, img_size});
+
+				// pos = ImGui::GetWindowPos();
+				// size = ImGui::GetWindowSize();
 
 				shader.use();
 				glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
@@ -377,17 +382,27 @@ int opengl_context(GLFWwindow* window) {
 				if (previews.find(id) != previews.end()) {
 					shared_ptr<Preview> preview = previews[id];
 					preview->draw(node, colorFlagLocation, VAO, gridTrigCount);
-
-					// ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)node->dynamc.texture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
-					ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)preview->fbTexture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
+					ImGui::Image((void *)(intptr_t)preview->fbTexture, {img_size, img_size}, ImVec2(0, 1), ImVec2(1, 0));
 				} else {
 					ImGui::Text("No preview");
 				}
 				ImGui::Text("texture %d", id);
+				ImGui::EndChild();
+
+				ImGui::SameLine();
+
+				ImGui::BeginChild("2d", {img_size, img_size});
+				pos = ImGui::GetWindowPos();
+				size = ImGui::GetWindowSize();
+
+				if (node != nullptr) {
+					ImGui::Image((void *)(intptr_t)node->dynamc.texture, {img_size, img_size}, ImVec2(0, 1), ImVec2(1, 0));
+				}
+
+				ImGui::EndChild();
 				ImGui::End();
 
 				if (!opened) {
-					// previews.erase(id);
 					it = previewed_nodes.erase(it);
 					previews.erase(id);
 				} else {
