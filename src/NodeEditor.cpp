@@ -238,9 +238,13 @@ void NodeEditor::debgz() {
 	ImGui::Text("nodes size: %d", nodes.size());
 }
 
-void NodeEditor::draw(bool* new_preview) {
+void NodeEditor::draw(bool* new_preview, int* new_preview_id) {
 	if (new_preview != nullptr) {
 		*new_preview = false;
+	}
+
+	if (new_preview_id != nullptr) {
+		*new_preview_id = -1;
 	}
 
 	ImGui::Begin("Nodes");
@@ -259,29 +263,6 @@ void NodeEditor::draw(bool* new_preview) {
 	// 						ImNodes::IsEditorHovered(),
 	// 						ImGui::IsMouseReleased(2));
 	// }
-
-
-	//
-	// Drawing nodes
-	//
-	const float node_width = 100.0f;
-	// for (shared_ptr<UiNode>& node : nodes) {
-	// for (map<int, UiNode>::iterator it = nodes.begin(); it != nodes.end(); it++) {
-	for (auto& [id, node] : nodes) {
-		if (node->draw()) {
-			previewedNodes.insert(id);
-			if (new_preview != nullptr) {
-				*new_preview = true;
-			}
-		}
-	}
-	// ImNodes::MiniMap();
-
-	// Drawing links between nodes
-	int link_i = 0;
-	for (const auto& [id, link] : links) {
-		ImNodes::Link(id, link.beg, link.end);
-	}
 
 
 	if (ImGui::BeginPopup("Add node")) {
@@ -318,8 +299,33 @@ void NodeEditor::draw(bool* new_preview) {
 		ImGui::EndPopup();
 	}
 
+	//
+	// Drawing nodes
+	//
+	const float node_width = 100.0f;
+	// for (shared_ptr<UiNode>& node : nodes) {
+	// for (map<int, UiNode>::iterator it = nodes.begin(); it != nodes.end(); it++) {
+	for (auto& [id, node] : nodes) {
+		if (node->draw()) {
+			previewedNodes.insert(id);
+			if (new_preview != nullptr) {
+				*new_preview = true;
+			}
+			if (new_preview_id != nullptr) {
+				*new_preview_id = id;
+			}
+		}
+	}
+	// ImNodes::MiniMap();
+
+	// Drawing links between nodes
+	int link_i = 0;
+	for (const auto& [id, link] : links) {
+		ImNodes::Link(id, link.beg, link.end);
+	}
 
 	ImNodes::EndNodeEditor();
+	ImGui::End(); // If this is not after EndNodeEditor, then something messes up in imgui window stack.
 	
 	int n_nodes_selected = ImNodes::NumSelectedNodes();
 	if (n_nodes_selected > 0 && right_click) {
@@ -475,7 +481,6 @@ void NodeEditor::draw(bool* new_preview) {
 		}
 
 		nodesChanged(queue);
-
 	}
 }
 

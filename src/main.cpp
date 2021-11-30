@@ -197,6 +197,7 @@ int opengl_context(GLFWwindow* window) {
 	Preview default_preview;
 	Preview second_preview;
 	map<int, shared_ptr<Preview>> previews;
+	set<int> previewed_nodes;
 
 	while (!glfwWindowShouldClose(window)) {
 		
@@ -316,9 +317,10 @@ int opengl_context(GLFWwindow* window) {
 		// //
 
 		ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)default_preview.fbTexture, ImVec2(pos.x, pos.y), ImVec2(pos.x + size.x, pos.y + size.y), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
+		ImGui::End(); // Teren
 		
-		// if (!node_editor.previewedNodes.empty()) {
-		// 	for (const int& id : node_editor.previewedNodes) {
+		// if (!previewed_nodes.empty()) {
+		// 	for (const int& id : previewed_nodes) {
 		// 		char name[100] = "";
 		// 		sprintf(name, "texure %d", id);
 		// 		const char* window_id = (const char*)name;
@@ -339,25 +341,24 @@ int opengl_context(GLFWwindow* window) {
 		// 	}
 		// }
 
-		ImGui::End();
 
-		if (!node_editor.previewedNodes.empty()) {
-			for (const int& id : node_editor.previewedNodes) {
+		if (!previewed_nodes.empty()) {
+			// for (const int& id : previewed_nodes) {
+			for (set<int>::iterator it = previewed_nodes.begin(); it != previewed_nodes.end();) {
+				int id = *it;
+
 				if (previews.find(id) == previews.end()) {
 					continue;
 				}
 
 				char name[100] = "";
-				sprintf(name, "texure %d", id);
+				sprintf(name, "texture %d", id);
 				const char* window_id = (const char*)name;
 				shared_ptr<UiNode> node = node_editor.getNode(id);
 
 				// Turns out, windows should'n be created this way.
-				bool closed = ImGui::Begin(window_id, &node->preview);
-				if (!node->preview) {
-					// previews.erase(id);
-					// node_editor.previewedNodes.erase(id);
-				}
+				bool opened = true;
+				bool closed = ImGui::Begin(window_id, &opened);
 
 				pos = ImGui::GetWindowPos();
 				size = ImGui::GetWindowSize();
@@ -384,10 +385,20 @@ int opengl_context(GLFWwindow* window) {
 				}
 				ImGui::Text("texture %d", id);
 				ImGui::End();
+
+				if (!opened) {
+					// previews.erase(id);
+					it = previewed_nodes.erase(it);
+					previews.erase(id);
+				} else {
+					it++;
+				}
 			}
 		}
 
 		ImGui::Begin("Paramz");
+		ImGui::Text("previews size: %d", previews.size());
+		ImGui::Text("previewed nodes size: %d", previewed_nodes.size());
 		ImGui::Text("pos: %f %f", pos.x, pos.y);
 		ImGui::Text("size: %f %f", size.x, size.y);
 		ImGui::Checkbox("keyCtrl", &ImGui::GetIO().KeyCtrl);
@@ -414,6 +425,7 @@ int opengl_context(GLFWwindow* window) {
 				node_editor.nodesChanged({activeNode->id});
 			}
 		}
+		ImGui::End(); // Paramz?
 
 		// File dialogs are here because they modify node editor state and set activeNode (selectedNode in NodeEditor) 
 		// to nullptr, and as a result program tries to use nonexistent object (not operating on raw pointer here in main
@@ -440,27 +452,28 @@ int opengl_context(GLFWwindow* window) {
 			ImGuiFileDialog::Instance()->Close();
 		}
 
-		ImGui::End();
 
 		//
 		// Node editor
 		bool new_preview = false;
-		node_editor.draw(&new_preview);
+		int preview_id = -1;
+		node_editor.draw(&new_preview, &preview_id);
 
 		if (new_preview) {
-			for (const int id : node_editor.previewedNodes) {
-				if (auto it = previews.find(id); it == previews.end()) {
-					shared_ptr<Preview> preview = make_shared<Preview>();
-					previews[id] = preview;
-				} else {
-					printf("Found preview %d\n", id);
-				}
+			// for (const int id : node_editor.previewedNodes) {
+			if (auto it = previews.find(preview_id); it == previews.end()) {
+				shared_ptr<Preview> preview = make_shared<Preview>();
+				previews[preview_id] = preview;
+				previewed_nodes.insert(preview_id);
+			} else {
+				printf("Found preview %d\n", preview_id);
 			}
+			// }
 		}
 		//
 		//
 
-		ImGui::End();
+		// ImGui::End(); // nodeeditor draw
 		
 		ImGui::Begin("Texture preview");
 		pos = ImGui::GetWindowPos();

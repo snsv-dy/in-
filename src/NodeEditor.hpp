@@ -47,7 +47,7 @@ public:
 	void unpackNode(const json& json_node);
 	void addNode(const int& type, int id = -1, ImVec2 position = {0.0f, 0.0f});
 	void debgz();
-	void draw(bool* new_preview);
+	void draw(bool* new_preview, int* new_preview_id);
 	void nodesChanged(const vector<int> node_id);
 	int getLinksSize();
 	void addLink(const int& beg, const int& end);
