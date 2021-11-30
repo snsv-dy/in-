@@ -206,6 +206,7 @@ void NodeEditor::addNode(const int& type, int id, ImVec2 position) {
 		case 1: generator = make_unique<GradGenerator>(); break;
 		case 2: generator = make_unique<CombinerGenerator>(); break;
 		case 3: generator = make_unique<ColorGenerator>(); break;
+		case 4: generator = make_unique<NoiseGenerator>(); break;
 	}
 
 	shared_ptr<UiNode> node = make_shared<UiNode>(move(generator), type == 3 ? false : true);
@@ -290,6 +291,11 @@ void NodeEditor::draw(bool* new_preview, int* new_preview_id) {
 		if (ImGui::MenuItem("Color")) {
 			addingNode = true;
 			type = 3;
+		} 
+
+		if (ImGui::MenuItem("OpenSimplex2")) {
+			addingNode = true;
+			type = 4;
 		} 
 
 		if (addingNode) {

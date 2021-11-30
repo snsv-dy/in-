@@ -22,6 +22,7 @@
 #include "GradGen.hpp"
 #include "CombinerGenerator.hpp"
 #include "ColorGenerator.hpp"
+#include "NoiseGenerator.hpp"
 
 using namespace std;
 using json = nlohmann::json;

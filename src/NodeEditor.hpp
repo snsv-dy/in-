@@ -25,6 +25,7 @@
 #include "GradGen.hpp"
 #include "CombinerGenerator.hpp"
 #include "ColorGenerator.hpp"
+#include "NoiseGenerator.hpp"
 #include "UiNode.hpp"
 
 using namespace std;
