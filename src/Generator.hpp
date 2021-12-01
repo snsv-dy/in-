@@ -35,6 +35,17 @@ public:
 	virtual bool setInput(int index, DynamcTexture* dynamc) { return false; }
 	virtual bool unsetInput(int index) { return false; }
 	virtual json serialize() { return json({}); };
+
+	virtual void unpackParamsWrap(const json& json_data) {
+		try {
+			unpackParams(json_data);
+		} catch (const nlohmann::detail::out_of_range& e) {
+			printf("Node unpacking error: %s\n", e.what());
+		}
+	}
+
+	// Use at() when accessing elements of json data, 
+	// so that function above can catch exception if it happens.
 	virtual void unpackParams(const json& json_data) =0;
 
 	virtual ~Generator() {}

@@ -23,7 +23,7 @@ UiNode::UiNode(const json& json_data): dynamc{texWidth, texWidth, json_data["typ
 	}
 
 	this->generator->setTexture(&dynamc);
-	this->generator->unpackParams(json_data["generator"]);
+	this->generator->unpackParamsWrap(json_data["generator"]);
 
 	// shared_ptr<UiNode> node = make_shared<UiNode>(move(generator), type == 3 ? false : true);
 	this->id = json_data["id"];
