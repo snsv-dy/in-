@@ -21,7 +21,7 @@ public:
 		} else {
 			data = new float[width * height * 3];
 		}
-
+	
 		this->monochrome = monochrome;
 
 		glGenTextures(1, &texture);

@@ -26,6 +26,7 @@
 #include "CombinerGenerator.hpp"
 #include "ColorGenerator.hpp"
 #include "NoiseGenerator.hpp"
+#include "ErosionGenerator.hpp"
 #include "UiNode.hpp"
 
 using namespace std;

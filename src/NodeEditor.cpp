@@ -207,6 +207,7 @@ void NodeEditor::addNode(const int& type, int id, ImVec2 position) {
 		case 2: generator = make_unique<CombinerGenerator>(); break;
 		case 3: generator = make_unique<ColorGenerator>(); break;
 		case 4: generator = make_unique<NoiseGenerator>(); break;
+		case 5: generator = make_unique<ErosionGenerator>(); break;
 	}
 
 	shared_ptr<UiNode> node = make_shared<UiNode>(move(generator), type == 3 ? false : true);
@@ -224,6 +225,10 @@ void NodeEditor::addNode(const int& type, int id, ImVec2 position) {
 		node->inputs.push_back(++current_id);
 		color = NODE_COLOR_YELLOW;
 		colorSelected = NODE_COLOR_YELLOW_SELECTED;
+	}
+
+	if (type == 5) {
+		node->inputs.push_back(++current_id);
 	}
 
 	node->outputs.push_back(++current_id);
@@ -296,6 +301,11 @@ void NodeEditor::draw(bool* new_preview, int* new_preview_id) {
 		if (ImGui::MenuItem("OpenSimplex2")) {
 			addingNode = true;
 			type = 4;
+		} 
+
+		if (ImGui::MenuItem("Erosion")) {
+			addingNode = true;
+			type = 5;
 		} 
 
 		if (addingNode) {

@@ -23,6 +23,7 @@
 #include "CombinerGenerator.hpp"
 #include "ColorGenerator.hpp"
 #include "NoiseGenerator.hpp"
+#include "ErosionGenerator.hpp"
 
 using namespace std;
 using json = nlohmann::json;
