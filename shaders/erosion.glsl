@@ -33,29 +33,30 @@ vec4 computeDeltas(ivec2 pixel_coords, ivec2 dims) {
 	float y = float(pixel_coords.y) / dims.y;
 
 	float value = imageLoad(img_output, pixel_coords).x;
+	float water_value = imageLoad(water, pixel_coords).x;
 
 	float valueL = 
 		imageLoad(img_output, pixel_coords + ivec2(-1, 0)).x
-		;//+ imageLoad(water, pixel_coords + ivec2(-1, 0)).x;
-	float deltaL = value;
+		+ imageLoad(water, pixel_coords + ivec2(-1, 0)).x;
+	float deltaL = value + water_value;
 	deltaL -= valueL;
 
 	float valueR = 
 		imageLoad(img_output, pixel_coords + ivec2(1, 0)).x
-		;//+ imageLoad(water, pixel_coords + ivec2(1, 0)).x;
-	float deltaR = value;
+		+ imageLoad(water, pixel_coords + ivec2(1, 0)).x;
+	float deltaR = value + water_value;
 	deltaR -= valueR;
 
 	float valueT = 
 		imageLoad(img_output, pixel_coords + ivec2(0, 1)).x
-		;//+ imageLoad(water, pixel_coords + ivec2(0, 1)).x;
-	float deltaT = value;
+		+ imageLoad(water, pixel_coords + ivec2(0, 1)).x;
+	float deltaT = value + water_value;
 	deltaT -= valueT;
 
 	float valueB = 
 		imageLoad(img_output, pixel_coords + ivec2(0, -1)).x
-		;//+ imageLoad(water, pixel_coords + ivec2(0, -1)).x;
-	float deltaB = value;
+		+ imageLoad(water, pixel_coords + ivec2(0, -1)).x;
+	float deltaB = value + water_value;
 	deltaB -= valueB;
 
 	return vec4(deltaL, deltaR, deltaT, deltaB);
@@ -90,9 +91,9 @@ void main() {
 		float K = min(1.0, water_value.x * cell_area * cell_area / (vFlow.x + vFlow.y + vFlow.z + vFlow.w) * dt);
 		// vFlow *= K;
 		// vFlow.r = 1.0;
-		vFlow.g = 0.0;
-		vFlow.b = 0.0;
-		vFlow.a = 0.0;
+		// vFlow.g = 0.0;
+		// vFlow.b = 0.0;
+		// vFlow.a = 0.0;
 		imageStore(flow, pixel_coords, vFlow);
 		// imageStore(water, pixel_coords, vec4(K));
 		memoryBarrier();
