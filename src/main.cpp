@@ -503,7 +503,8 @@ int opengl_context(GLFWwindow* window) {
 			if (activeNode->type_i == 5) {
 				ErosionGenerator* gen = (ErosionGenerator*)activeNode->generator.get();
 				// ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)gen->flow_texture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
-				ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)gen->water_texture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
+				// ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)gen->water_texture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0), IM_COL32(255, 255, 0, 255)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
+				ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)gen->compute_texture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0), IM_COL32(255, 0, 0, 255)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
 			} else {
 				ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)activeNode->dynamc.texture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
 			}

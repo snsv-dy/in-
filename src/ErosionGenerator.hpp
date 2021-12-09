@@ -158,17 +158,19 @@ printf("max local work group invocations %i\n", work_grp_inv);
 	}
 
 	void initWater() {
-		float* tdata = new float[512 * 512];
+		float* tdata = new float[512 * 512 * 2];
 
 		for (int y = 0; y < 512; y++) {
 			for (int x = 0; x < 512; x++) {
-				tdata[y * 512 + x] = 0.1;
+				int index = (y * 512 + x) * 2;
+				tdata[index] = input1->data[y * 512 + x];
+				tdata[index + 1] = 0.0; // initial water for debug
 			}
 		}
 
 		// Load initial height
-		glBindTexture(GL_TEXTURE_2D, water_texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, tex_w, tex_h, 0, GL_RED, GL_FLOAT, tdata);
+		glBindTexture(GL_TEXTURE_2D, compute_texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, tex_w, tex_h, 0, GL_RG, GL_FLOAT, tdata);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		delete[] tdata;
@@ -191,18 +193,41 @@ printf("max local work group invocations %i\n", work_grp_inv);
 		delete[] tdata;
 	}
 
+	void clearWater(unsigned int texture) {
+		float* tdata = new float[512 * 512 * 4];
+
+		for (int y = 0; y < 512; y++) {
+			for (int x = 0; x < 512; x++) {
+				int index = (y * 512 + x) * 4;
+				tdata[index] = 0.0;
+				tdata[index + 1] = 0.0;
+				tdata[index + 2] = 0.0;
+				tdata[index + 3] = 0.0;
+			}
+		}
+
+		// Load initial height
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, tex_w, tex_h, 0, GL_RGBA, GL_FLOAT, tdata);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		delete[] tdata;
+	}
+
 	void gen() {
 		if (input1 != nullptr) {
 
 			initWater();
 
 			// Load initial height	
-			glBindTexture(GL_TEXTURE_2D, compute_texture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, tex_w, tex_h, 0, GL_RED, GL_FLOAT, input1->data);
-			glBindTexture(GL_TEXTURE_2D, 0);
+			// glBindTexture(GL_TEXTURE_2D, compute_texture);
+			// glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, tex_w, tex_h, 0, GL_RED, GL_FLOAT, input1->data);
+			// glBindTexture(GL_TEXTURE_2D, 0);
 
 			// Clear flow
 			clearTexture(flow_texture);
+			// clearTexture(water_texture);
+			clearWater(water_texture);
 
 			glUseProgram(ray_program);
 
@@ -224,6 +249,12 @@ printf("max local work group invocations %i\n", work_grp_inv);
 			glBindTexture(GL_TEXTURE_2D, flow_texture);
 
 			for (int i = 0; i < n_iterations; i++) {
+
+				// Water increment stage
+				glUniform1i(stage_location, 6);
+				glDispatchCompute(tex_w, tex_h, 1);
+				glMemoryBarrier(GL_ALL_BARRIER_BITS);
+				
 				// Flow stage
 				glUniform1i(stage_location, 0);
 				glDispatchCompute(tex_w, tex_h, 1);
@@ -231,6 +262,26 @@ printf("max local work group invocations %i\n", work_grp_inv);
 
 				// Water stage
 				glUniform1i(stage_location, 1);
+				glDispatchCompute(tex_w, tex_h, 1);
+				glMemoryBarrier(GL_ALL_BARRIER_BITS);
+
+				// Velocity stage
+				glUniform1i(stage_location, 2);
+				glDispatchCompute(tex_w, tex_h, 1);
+				glMemoryBarrier(GL_ALL_BARRIER_BITS);
+
+				// Erosion and deposition stage
+				glUniform1i(stage_location, 3);
+				glDispatchCompute(tex_w, tex_h, 1);
+				glMemoryBarrier(GL_ALL_BARRIER_BITS);
+
+				// Sediment transportation stage
+				glUniform1i(stage_location, 4);
+				glDispatchCompute(tex_w, tex_h, 1);
+				glMemoryBarrier(GL_ALL_BARRIER_BITS);
+
+				// Water evaporation stage
+				glUniform1i(stage_location, 5);
 				glDispatchCompute(tex_w, tex_h, 1);
 				glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
