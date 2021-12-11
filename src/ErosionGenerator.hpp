@@ -20,6 +20,7 @@ public:
 	GLuint compute_texture = 0;
 	GLuint water_texture = 0;
 	GLuint flow_texture = 0;
+	GLuint debug_texture = 0;
 
 	GLuint ray_program = 0;
 	int tex_w = 512, tex_h = 512;
@@ -28,6 +29,7 @@ public:
 	GLuint img_output_location = 0;
 	GLuint water_location = 0;
 	GLuint flow_location = 0;
+	GLuint debug_location = 0;
 	GLuint stage_location = 0;
 
 	ErosionGenerator() {
@@ -44,6 +46,7 @@ public:
 		compute_texture = genTexture(GL_TEXTURE0);
 		water_texture = genTexture(GL_TEXTURE2, GL_READ_WRITE);
 		flow_texture = genTexture(GL_TEXTURE3, GL_READ_WRITE);
+		debug_texture = genTexture(GL_TEXTURE4, GL_READ_WRITE);
 
 		int work_grp_count[3];
 		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &work_grp_count[0]);
@@ -133,6 +136,7 @@ printf("max local work group invocations %i\n", work_grp_inv);
 			water_location = glGetUniformLocation(ray_program, "water");
 			flow_location = glGetUniformLocation(ray_program, "flow");
 			stage_location = glGetUniformLocation(ray_program, "stage");
+			debug_location = glGetUniformLocation(ray_program, "debug");
 
 			return 0;
 		}
@@ -164,7 +168,7 @@ printf("max local work group invocations %i\n", work_grp_inv);
 			for (int x = 0; x < 512; x++) {
 				int index = (y * 512 + x) * 2;
 				tdata[index] = input1->data[y * 512 + x];
-				tdata[index + 1] = 0.0; // initial water for debug
+				tdata[index + 1] = 0.01; // initial water for debug
 			}
 		}
 
@@ -214,6 +218,27 @@ printf("max local work group invocations %i\n", work_grp_inv);
 		delete[] tdata;
 	}
 
+	void copyHeightFromResult() {
+		float* tdata = new float[512 * 512 * 4];
+
+		// Load initial height
+		glBindTexture(GL_TEXTURE_2D, compute_texture);
+		// glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, tex_w, tex_h, 0, GL_RGBA, GL_FLOAT, tdata);
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, tdata);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		for (int y = 0; y < 512; y++) {
+			for (int x = 0; x < 512; x++) {
+				int index = (y * 512 + x);
+				dynamc->data[index] = tdata[index * 4];
+			}
+		}
+
+		delete[] tdata;
+
+		dynamc->updateGL();
+	}
+
 	void gen() {
 		if (input1 != nullptr) {
 
@@ -235,6 +260,7 @@ printf("max local work group invocations %i\n", work_grp_inv);
 			glUniform1i(height_input_location, 1);
 			glUniform1i(water_location, 2);
 			glUniform1i(flow_location, 3);
+			glUniform1i(debug_location, 4);
 
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, compute_texture);
@@ -247,6 +273,9 @@ printf("max local work group invocations %i\n", work_grp_inv);
 
 			glActiveTexture(GL_TEXTURE3);
 			glBindTexture(GL_TEXTURE_2D, flow_texture);
+			
+			glActiveTexture(GL_TEXTURE4);
+			glBindTexture(GL_TEXTURE_2D, debug_texture);
 
 			for (int i = 0; i < n_iterations; i++) {
 
@@ -254,7 +283,7 @@ printf("max local work group invocations %i\n", work_grp_inv);
 				glUniform1i(stage_location, 6);
 				glDispatchCompute(tex_w, tex_h, 1);
 				glMemoryBarrier(GL_ALL_BARRIER_BITS);
-				
+
 				// Flow stage
 				glUniform1i(stage_location, 0);
 				glDispatchCompute(tex_w, tex_h, 1);
@@ -288,6 +317,8 @@ printf("max local work group invocations %i\n", work_grp_inv);
 				// glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 				printf("Erosion once\n");
 			}
+
+			copyHeightFromResult();
 		} else {
 			printf("No input in erosion\n");
 		}

@@ -39,7 +39,7 @@ dt = 0.005
 pipe_length = 1.1
 pipe_area = 1.1
 g = 9.8
-terrain = plt.imread("height4.png")
+terrain = plt.imread("height.png")
 terrain_zeros = np.zeros(shape=terrain.shape)
 print(terrain.shape)
 
@@ -120,9 +120,9 @@ for i in range(100):
 
 	K = np.minimum(1.0, water * cell_area * cell_area / (flowL + flowR + flowT + flowB) * dt )
 	flowL *= K
-	flowR *= 0.0
-	flowT *= 0.0
-	flowB *= 0.0
+	flowR *= K
+	flowT *= K
+	flowB *= K
 
 	flowOut = np.zeros(shape=terrain.shape)
 	flowOut[:, 1:] += flowL[:, 1:]

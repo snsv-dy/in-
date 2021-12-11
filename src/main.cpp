@@ -108,7 +108,7 @@ int opengl_context(GLFWwindow* window) {
 	const std::string vsPath = "shaders/basic.vs";
 	const std::string fsPath = "shaders/basic.fs";
 
-	const int gridSize = 200;
+	const int gridSize = 500;
 	auto [VAO, VBO] = createBufferForGridSize(gridSize);
 	const int gridTrigCount = (gridSize - 1) * (gridSize - 1) * 2;
 	const int gridDataSize = gridTrigCount * 3 * 3; // (3 vertices 3 parameters of each vertex (x, y, z))
@@ -504,7 +504,11 @@ int opengl_context(GLFWwindow* window) {
 				ErosionGenerator* gen = (ErosionGenerator*)activeNode->generator.get();
 				// ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)gen->flow_texture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
 				// ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)gen->water_texture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0), IM_COL32(255, 255, 0, 255)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
-				ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)gen->compute_texture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0), IM_COL32(255, 0, 0, 255)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
+				// ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)gen->compute_texture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0), IM_COL32(255, 0, 0, 255)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
+				// ImGui::Image((void *)(intptr_t)gen->water_texture, {img_size, img_size}, ImVec2(0, 1), ImVec2(1, 0), ImVec4(1.0f, 1.0, 0.0f, 1.0f));
+				// ImGui::Image((void *)(intptr_t)gen->water_texture, {img_size, img_size}, ImVec2(0, 1), ImVec2(1, 0), ImVec4(0.0f, 0.0, 1.0f, 1.0f));
+				ImGui::Image((void *)(intptr_t)gen->compute_texture, {img_size, img_size}, ImVec2(0, 1), ImVec2(1, 0), ImVec4(1.0f, 0.0, 0.0f, 1.0f));
+				ImGui::Image((void *)(intptr_t)gen->debug_texture, {img_size, img_size}, ImVec2(0, 1), ImVec2(1, 0), ImVec4(1.0f, 0.0, 1.0f, 1.0f));
 			} else {
 				ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)activeNode->dynamc.texture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
 			}

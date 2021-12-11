@@ -21,6 +21,7 @@ UiNode::UiNode(const json& json_data): dynamc{texWidth, texWidth, json_data["typ
 		case 3: generator = move(make_unique<ColorGenerator>()); break;
 		case 4: generator = move(make_unique<NoiseGenerator>()); break;
 		case 5: generator = move(make_unique<ErosionGenerator>()); break;
+		case 6: generator = move(make_unique<CPUErosion>()); break;
 	}
 
 	this->generator->setTexture(&dynamc);

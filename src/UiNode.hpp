@@ -24,6 +24,7 @@
 #include "ColorGenerator.hpp"
 #include "NoiseGenerator.hpp"
 #include "ErosionGenerator.hpp"
+#include "CPUErosion.hpp"
 
 using namespace std;
 using json = nlohmann::json;
