@@ -337,6 +337,8 @@ void NodeEditor::draw(bool* new_preview, int* new_preview_id) {
 				*new_preview_id = id;
 			}
 		}
+
+		// if (node->generator)
 	}
 	// ImNodes::MiniMap();
 

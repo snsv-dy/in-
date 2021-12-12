@@ -210,6 +210,10 @@ int opengl_context(GLFWwindow* window) {
 		UiNode* activeNode = nullptr;
 		if (node_editor.selectedNode != nullptr) {
 			activeNode = node_editor.selectedNode.get();
+			if (activeNode->generator->genInprogress) {
+				activeNode->generator->gen();
+				glfwPostEmptyEvent();
+			}
 		}
 
 		ImGui::BeginMainMenuBar();

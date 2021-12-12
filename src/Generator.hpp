@@ -15,8 +15,10 @@ protected:
 	int width = 512;
 	int height = width;
 public:
+	bool genInprogress = false;
+	float genProgress = 0.0f;
 	virtual bool drawGui() =0;
-	virtual void gen() =0;
+	virtual void gen() =0; // If true, it need's to be called 
 
 	virtual void setTexture(DynamcTexture* dynamc) {
 		this->dynamc = dynamc;
