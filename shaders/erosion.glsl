@@ -123,7 +123,7 @@ void main() {
 		imageStore(flow, pixel_coords, vFlow);
 		// imageStore(water, pixel_coords, vec4(K));
 		vec4 debugv = imageLoad(debug, pixel_coords);
-		debugv
+		debugv	
 		imageStore(debug, pixel_coords, )
 		memoryBarrier();
 	} else if (stage == 1) {

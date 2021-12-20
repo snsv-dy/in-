@@ -8,18 +8,46 @@ private:
 	int current_i = 0;
 public:
 	DynamcTexture* input1 = nullptr;
-	int iter_per_gen = 10;
-	int n_iterations = 300 / iter_per_gen;
+	int iter_per_gen = 500;
+	int n_iterations = 1000;
 
 	bool drawGui() {
 		bool changed = false;
 
 		ImGui::DragInt("iterations", &n_iterations);
 		ImGui::DragInt("iterations multiplier", &iter_per_gen);
+		
+		ImGui::DragFloat("capacityParam", &capacityParam, 0.01f);
+		ImGui::DragFloat("minCapacity", &minCapacity, 0.01f);
+		ImGui::DragFloat("depositionRate", &depositionRate, 0.01f);
+		ImGui::DragFloat("erosionRate", &erosionRate, 0.01f);
+		ImGui::DragFloat("evaporationRate", &evaporationRate, 0.01f);
+		ImGui::DragFloat("gravity", &gravity, 0.01f);
+		ImGui::DragFloat("inertia", &inertia, 0.01f);
+		ImGui::Separator();
+		ImGui::DragFloat("startWater", &startWater, 0.01f);
+		ImGui::DragFloat("startSpeed", &startSpeed, 0.01f);
+
+		ImGui::Text("Progress");
+		ImGui::ProgressBar(genProgress);
+
+		bool disablebeg = false;
+		if (genInprogress) {
+			ImGui::BeginDisabled();
+			disablebeg = true;
+		}
 
 		if (ImGui::Button("generate")) {
 			gen();
 			changed = true;
+		}
+
+		if (disablebeg) {
+			ImGui::EndDisabled();
+		}
+
+		if (ImGui::Button("Stop")) {
+			stopGeneration();
 		}
 
 		return changed;
@@ -57,6 +85,18 @@ public:
 		return false;
 	}
 
+	float capacityParam = 4.0f; 
+	float minCapacity = 0.01f;
+	float depositionRate = 0.3f;
+	float erosionRate = 0.3f;
+	float evaporationRate = 0.02f;
+	float gravity = 4.0f;
+	float inertia = 0.05f;
+
+	float startWater = 1.0f;
+	float startSpeed = 1.0f;
+
+
 	float* dataPtr = nullptr;
 	float w = 0.0f;
 	float h = 0.0f;
@@ -75,13 +115,6 @@ public:
 
 	void iteration() {
 		printf("iteration: %d\n", current_i);
-		const float capacityParam = 4.0f; 
-		const float minCapacity = 0.01f;
-		const float depositionRate = 0.3f;
-		const float erosionRate = 0.3f;
-		const float evaporationRate = 0.02f;
-		const float gravity = 4.0f;
-		const float inertia = 0.05f;
 
 		// gradient test
 		// float* tdata = new float
@@ -108,8 +141,8 @@ public:
 			float posy = rand() % 512;
 			float dirx = 0.0f;
 			float diry = 0.0f;
-			float speed = 1.0f;
-			float water = 1.0f;
+			float speed = startSpeed;
+			float water = startWater;
 			float sediment = 0.0f;
 			for (int i = 0; i < maxlife; i++) {
 				int oldix = floor(posx);
@@ -120,7 +153,7 @@ public:
 				float gr_data[3];
 				bool gradres = gradient(dataPtr, posx, posy, gr_data);
 				if (!gradres) {
-					printf("break1\n");
+					// printf("break1\n");
 					break;
 				}
 				
@@ -135,14 +168,14 @@ public:
 				posy += diry;
 
 				if (posx < 0 || posx >= w - 1 || posy < 0 || posy >= h - 1) {
-					printf("breka\n");
+					// printf("breka\n");
 					break;
 				}
 
 				float oldHeight = gr_data[2];
 				gradres = gradient(dataPtr, posx, posy, gr_data);
 				if (!gradres) {
-					printf("breka3\n");
+					// printf("breka3\n");
 					break;
 				}
 				float newHeight = gr_data[2];
@@ -180,11 +213,15 @@ public:
 
 		}
 		current_i++;
-		genInprogress = current_i / (float)n_iterations;
+		genProgress = (current_i + 1) / (float)n_iterations;
 		if (current_i >= n_iterations) {
-			genInprogress = false;
-			current_i = 0;
+			stopGeneration();
 		}
+	}
+
+	void stopGeneration() {
+		genInprogress = false;
+		current_i = 0;
 	}
 
 	void gen() {

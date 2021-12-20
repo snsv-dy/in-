@@ -29,6 +29,7 @@
 #include "ErosionGenerator.hpp"
 #include "CPUErosion.hpp"
 #include "UiNode.hpp"
+#include "DropletErosion.hpp"
 
 using namespace std;
 using json = nlohmann::json;

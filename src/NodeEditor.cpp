@@ -209,6 +209,7 @@ void NodeEditor::addNode(const int& type, int id, ImVec2 position) {
 		case 4: generator = make_unique<NoiseGenerator>(); break;
 		case 5: generator = make_unique<ErosionGenerator>(); break;
 		case 6: generator = make_unique<CPUErosion>(); break;
+		case 7: generator = make_unique<DropletErosion>(); break;
 	}
 
 	shared_ptr<UiNode> node = make_shared<UiNode>(move(generator), type == 3 ? false : true);
@@ -228,7 +229,7 @@ void NodeEditor::addNode(const int& type, int id, ImVec2 position) {
 		colorSelected = NODE_COLOR_YELLOW_SELECTED;
 	}
 
-	if (type == 5 || type == 6) {
+	if (type == 5 || type == 6 || type == 7) {
 		node->inputs.push_back(++current_id);
 	}
 
@@ -312,6 +313,11 @@ void NodeEditor::draw(bool* new_preview, int* new_preview_id) {
 		if (ImGui::MenuItem("Erosion2")) {
 			addingNode = true;
 			type = 6;
+		} 
+
+		if (ImGui::MenuItem("DropletErosion")) {
+			addingNode = true;
+			type = 7;
 		} 
 
 		if (addingNode) {

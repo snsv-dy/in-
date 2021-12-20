@@ -24,9 +24,9 @@ public:
 	bool drawGui() {
 		bool changed = false;
 		changed |= ImGui::DragFloat("Amplitude", &amplitude, 0.01f);
-		changed |= ImGui::DragFloat("Period", &period, 0.1f);
-		changed |= ImGui::DragFloat("xranslation", &xtranslation, 0.1f);
-		changed |= ImGui::DragFloat("ytranslation", &ytranslation, 0.1f);
+		changed |= ImGui::DragFloat("Period", &period, 0.01f);
+		changed |= ImGui::DragFloat("xranslation", &xtranslation, 0.01f);
+		changed |= ImGui::DragFloat("ytranslation", &ytranslation, 0.01f);
 		changed |= ImGui::SliderInt("Axis", &axis, 0, 1);
 
 		if (changed) {

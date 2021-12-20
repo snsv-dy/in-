@@ -25,6 +25,7 @@
 #include "NoiseGenerator.hpp"
 #include "ErosionGenerator.hpp"
 #include "CPUErosion.hpp"
+#include "DropletErosion.hpp"
 
 using namespace std;
 using json = nlohmann::json;
