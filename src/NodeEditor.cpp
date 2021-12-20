@@ -6,7 +6,7 @@ NodeEditor::NodeEditor() {
 	ImNodes::StyleColorsDark();
     // ImNodes::PushAttributeFlag(ImNodesAttributeFlags_EnableLinkDetachWithDragClick);
     ImNodes::GetIO().LinkDetachWithModifierClick.Modifier = &ImGui::GetIO().KeyCtrl;
-	
+    ImNodes::GetIO().EmulateThreeButtonMouse.Modifier = &ImGui::GetIO().KeyShift;
 	// UiNode node1;
 	// node1.id = ++current_id;
 	// node1.input = ++current_id;

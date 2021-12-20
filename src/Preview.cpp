@@ -30,7 +30,7 @@ Preview::Preview() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);	
 }
 
-void Preview::draw(const shared_ptr<UiNode>& node, unsigned int colorFlagLocation, unsigned int VAO, unsigned int gridTrigCount) {
+void Preview::draw(const shared_ptr<UiNode>& node, unsigned int colorFlagLocation, unsigned int VAO, unsigned int gridTrigCount, unsigned int projectionLocation, unsigned int viewLocation, unsigned int modelLocation) {
 	//
 	// 3d drawing
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -41,9 +41,9 @@ void Preview::draw(const shared_ptr<UiNode>& node, unsigned int colorFlagLocatio
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// shader.use();
-	// glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
-	// glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
-	// glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
+	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
+	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model));
 
 	// glUniform1i(heightLocation, 0);
 	// glUniform1i(colorLocation, 1);
@@ -69,6 +69,44 @@ void Preview::draw(const shared_ptr<UiNode>& node, unsigned int colorFlagLocatio
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	// 3d drawing end
 	//
+}
+
+// Change namae
+void Preview::updateMovement() {
+
+	bool cameraMoved = false;
+	if(ImGui::IsWindowFocused() && ImGui::IsMouseDragging(0)) {
+		ImVec2 delta = ImGui::GetMouseDragDelta();
+		const float mouseSensitivity = 0.5;
+		cameraRotation.x -= delta.x * mouseSensitivity;
+		cameraRotation.y += delta.y * mouseSensitivity;
+		if (cameraRotation.y <= -89.9f) {
+			cameraRotation.y = -89.9f;
+		} else if (cameraRotation.y >= 89.9f) {
+			cameraRotation.y = 89.9f;
+		}
+		ImGui::ResetMouseDragDelta();
+
+		cameraMoved = true;
+	}
+
+	float& scrolled_amount = ImGui::GetIO().MouseWheel;
+	if (ImGui::IsWindowHovered() && scrolled_amount != 0.0f) {
+		// printf("scrolled: %2.2f\n", scrolled_amount);
+		float cameraOffset = scrolled_amount * cameraScrollSpeed;
+		if (cameraOrigin.z + cameraOffset <= 0.0f) {
+			cameraOrigin.z += cameraOffset;
+		}
+
+		cameraMoved = true;
+	}
+
+	if (cameraMoved) {
+		glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraRotation.x), glm::vec3(0.0f, 1.0f, 0.0f));
+		rotationMatrix = glm::rotate(rotationMatrix, glm::radians(cameraRotation.y), glm::vec3(1.0f, 0.0f, 0.0f));
+		glm::vec3 cameraPos = glm::vec3(rotationMatrix * glm::vec4(cameraOrigin, 1.0f));
+		view = glm::lookAt(cameraPos, -cameraPos, cameraUp);
+	}
 }
 
 Preview::~Preview() {

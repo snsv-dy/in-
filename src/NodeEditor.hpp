@@ -39,6 +39,7 @@ class NodeEditor {
 	map<int, shared_ptr<UiNode>> nodes;
 	int current_id = 0;
 	int links_id = 0;
+	ImVec2 last_panning {0.0f, 0.0f};
 public:
 	set<int> previewedNodes;
 	shared_ptr<UiNode> selectedNode = nullptr;

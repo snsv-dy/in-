@@ -155,13 +155,13 @@ int opengl_context(GLFWwindow* window) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glm::mat4 projection = glm::perspective(glm::radians(55.0f), 1.0f, 0.1f, 1000.0f);
-	glm::vec2 cameraRotation = glm::vec2(0.0f);
-	glm::vec3 cameraOrigin = glm::vec3(0.0f, 0.0f, -4.0f);
-	const float cameraScrollSpeed = 0.1f;
-	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-	glm::mat4 view = glm::lookAt(cameraOrigin, -cameraOrigin, cameraUp);
-	// glm::mat4 model = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(1.0f, 0.5f, 0.0f));
-	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.5f, 0.0f)); // Moved model 0.5 down, so that model will be centered in preview.
+	// glm::vec2 cameraRotation = glm::vec2(0.0f);
+	// glm::vec3 cameraOrigin = glm::vec3(0.0f, 0.0f, -4.0f);
+	// const float cameraScrollSpeed = 0.1f;
+	// glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+	// glm::mat4 view = glm::lookAt(cameraOrigin, -cameraOrigin, cameraUp);
+	// // glm::mat4 model = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(1.0f, 0.5f, 0.0f));
+	// glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.5f, 0.0f)); // Moved model 0.5 down, so that model will be centered in preview.
 
 	unsigned int projectionLocation = glGetUniformLocation(shader.getProgram(), "projection");
 	unsigned int viewLocation = glGetUniformLocation(shader.getProgram(), "view");
@@ -233,9 +233,10 @@ int opengl_context(GLFWwindow* window) {
 		ImVec2 pos = ImGui::GetWindowPos();
 		ImVec2 size = ImGui::GetWindowSize();
 
+		// This is needed.
 		if (lastWindowSize[0] != size.x || lastWindowSize[1] != size.y) {
 			// change perspective
-			projection = glm::perspective(glm::radians(55.0f), size.x / size.y, 0.1f, 1000.0f);
+			default_preview.projection = glm::perspective(glm::radians(55.0f), size.x / size.y, 0.1f, 1000.0f);
 
 			lastWindowSize[0] = size.x;
 			lastWindowSize[1] = size.y;
@@ -243,39 +244,40 @@ int opengl_context(GLFWwindow* window) {
 
 		//
 		// Model rotation
-		bool cameraMoved = false;
-		if(ImGui::IsWindowFocused() && ImGui::IsMouseDragging(0)) {
-			ImVec2 delta = ImGui::GetMouseDragDelta();
-			const float mouseSensitivity = 0.5;
-			cameraRotation.x -= delta.x * mouseSensitivity;
-			cameraRotation.y += delta.y * mouseSensitivity;
-			if (cameraRotation.y <= -89.9f) {
-				cameraRotation.y = -89.9f;
-			} else if (cameraRotation.y >= 89.9f) {
-				cameraRotation.y = 89.9f;
-			}
-			ImGui::ResetMouseDragDelta();
+		default_preview.updateMovement();
+		// bool cameraMoved = false;
+		// if(ImGui::IsWindowFocused() && ImGui::IsMouseDragging(0)) {
+		// 	ImVec2 delta = ImGui::GetMouseDragDelta();
+		// 	const float mouseSensitivity = 0.5;
+		// 	cameraRotation.x -= delta.x * mouseSensitivity;
+		// 	cameraRotation.y += delta.y * mouseSensitivity;
+		// 	if (cameraRotation.y <= -89.9f) {
+		// 		cameraRotation.y = -89.9f;
+		// 	} else if (cameraRotation.y >= 89.9f) {
+		// 		cameraRotation.y = 89.9f;
+		// 	}
+		// 	ImGui::ResetMouseDragDelta();
 
-			cameraMoved = true;
-		}
+		// 	cameraMoved = true;
+		// }
 
-		float& scrolled_amount = ImGui::GetIO().MouseWheel;
-		if (ImGui::IsWindowHovered() && scrolled_amount != 0.0f) {
-			// printf("scrolled: %2.2f\n", scrolled_amount);
-			float cameraOffset = scrolled_amount * cameraScrollSpeed;
-			if (cameraOrigin.z + cameraOffset <= 0.0f) {
-				cameraOrigin.z += cameraOffset;
-			}
+		// float& scrolled_amount = ImGui::GetIO().MouseWheel;
+		// if (ImGui::IsWindowHovered() && scrolled_amount != 0.0f) {
+		// 	// printf("scrolled: %2.2f\n", scrolled_amount);
+		// 	float cameraOffset = scrolled_amount * cameraScrollSpeed;
+		// 	if (cameraOrigin.z + cameraOffset <= 0.0f) {
+		// 		cameraOrigin.z += cameraOffset;
+		// 	}
 
-			cameraMoved = true;
-		}
+		// 	cameraMoved = true;
+		// }
 
-		if (cameraMoved) {
-			glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraRotation.x), glm::vec3(0.0f, 1.0f, 0.0f));
-			rotationMatrix = glm::rotate(rotationMatrix, glm::radians(cameraRotation.y), glm::vec3(1.0f, 0.0f, 0.0f));
-			glm::vec3 cameraPos = glm::vec3(rotationMatrix * glm::vec4(cameraOrigin, 1.0f));
-			view = glm::lookAt(cameraPos, -cameraPos, cameraUp);
-		}
+		// if (cameraMoved) {
+		// 	glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraRotation.x), glm::vec3(0.0f, 1.0f, 0.0f));
+		// 	rotationMatrix = glm::rotate(rotationMatrix, glm::radians(cameraRotation.y), glm::vec3(1.0f, 0.0f, 0.0f));
+		// 	glm::vec3 cameraPos = glm::vec3(rotationMatrix * glm::vec4(cameraOrigin, 1.0f));
+		// 	default_preview.view = glm::lookAt(cameraPos, -cameraPos, cameraUp);
+		// }
 		//
 		//
 
@@ -289,13 +291,13 @@ int opengl_context(GLFWwindow* window) {
 		// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		shader.use();
-		glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
-		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model));
+		// glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
+		// glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
+		// glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model));
 
 		glUniform1i(heightLocation, 0);
 		glUniform1i(colorLocation, 1);
-		default_preview.draw(node_editor.selectedNode, colorFlagLocation, VAO, gridTrigCount);
+		default_preview.draw(node_editor.selectedNode, colorFlagLocation, VAO, gridTrigCount, projectionLocation, viewLocation, modelLocation);
 		// // glBindTexture(GL_TEXTURE_2D, heightmap_texture);
 		// if (activeNode != nullptr) {
 		// 	glUniform1i(colorFlagLocation, !activeNode->dynamc.monochrome);
@@ -364,11 +366,9 @@ int opengl_context(GLFWwindow* window) {
 				bool opened = true;
 				bool closed = ImGui::Begin(window_id, &opened);
 				ImVec2 size = ImGui::GetContentRegionAvail();
-				size.x *= 0.5f;
-				// size.y *= 0.5f;
 				int img_size = size.x < size.y ? size.x : size.y;
-				pos.x += size.y < size.x ? (size.x - size.y) / 2 : 0;
-				pos.y += size.x < size.y ? (size.y - size.x) / 2 : 0;
+				// pos.x += size.y < size.x ? size.x - size.y : 0;
+				// pos.y += size.x < size.y ? size.y - size.x : 0;
 
 				ImGui::BeginChild("3d", {img_size, img_size});
 
@@ -376,28 +376,28 @@ int opengl_context(GLFWwindow* window) {
 				// size = ImGui::GetWindowSize();
 
 				shader.use();
-				glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
-				glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
-				glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model));
+				// glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
+				// glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
+				// glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model));
 
 				glUniform1i(heightLocation, 0);
 				glUniform1i(colorLocation, 1);
 
 				if (previews.find(id) != previews.end()) {
 					shared_ptr<Preview> preview = previews[id];
-					preview->draw(node, colorFlagLocation, VAO, gridTrigCount);
+					preview->updateMovement();
+					preview->draw(node, colorFlagLocation, VAO, gridTrigCount, projectionLocation, viewLocation, modelLocation);
 					ImGui::Image((void *)(intptr_t)preview->fbTexture, {img_size, img_size}, ImVec2(0, 1), ImVec2(1, 0));
 				} else {
 					ImGui::Text("No preview");
 				}
-				ImGui::Text("texture %d", id);
 				ImGui::EndChild();
 
-				ImGui::SameLine();
+				// ImGui::SameLine();
 
 				ImGui::BeginChild("2d", {img_size, img_size});
-				pos = ImGui::GetWindowPos();
-				size = ImGui::GetWindowSize();
+				// pos = ImGui::GetWindowPos();
+				// size = ImGui::GetWindowSize();
 
 				if (node != nullptr) {
 					ImGui::Image((void *)(intptr_t)node->dynamc.texture, {img_size, img_size}, ImVec2(0, 1), ImVec2(1, 0));
@@ -423,9 +423,9 @@ int opengl_context(GLFWwindow* window) {
 		ImGui::Checkbox("keyCtrl", &ImGui::GetIO().KeyCtrl);
 		ImGui::Text("Links size: %d\n", node_editor.getLinksSize());
 		ImGui::Text("Camera rotation: %d\n", node_editor.getLinksSize());
-		ImGui::Text("cameraRotation: %2.2f %2.2f\n", cameraRotation.x, cameraRotation.y);
-		ImGui::Text("cameraOrigin: %2.2f %2.2f %2.2f\n", cameraOrigin.x, cameraOrigin.y, cameraOrigin.z);
-		ImGui::Text("cameraUp: %2.2f %2.2f %2.2f\n", cameraUp.x, cameraUp.y, cameraUp.z);
+		ImGui::Text("cameraRotation: %2.2f %2.2f\n", default_preview.cameraRotation.x, default_preview.cameraRotation.y);
+		ImGui::Text("cameraOrigin: %2.2f %2.2f %2.2f\n", default_preview.cameraOrigin.x, default_preview.cameraOrigin.y, default_preview.cameraOrigin.z);
+		ImGui::Text("cameraUp: %2.2f %2.2f %2.2f\n", default_preview.cameraUp.x, default_preview.cameraUp.y, default_preview.cameraUp.z);
 		node_editor.debgz();
 		if (ImGui::Button("Save nodes")) {
 			node_editor.save();
