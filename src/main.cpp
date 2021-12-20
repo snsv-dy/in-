@@ -155,13 +155,6 @@ int opengl_context(GLFWwindow* window) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glm::mat4 projection = glm::perspective(glm::radians(55.0f), 1.0f, 0.1f, 1000.0f);
-	// glm::vec2 cameraRotation = glm::vec2(0.0f);
-	// glm::vec3 cameraOrigin = glm::vec3(0.0f, 0.0f, -4.0f);
-	// const float cameraScrollSpeed = 0.1f;
-	// glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-	// glm::mat4 view = glm::lookAt(cameraOrigin, -cameraOrigin, cameraUp);
-	// // glm::mat4 model = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(1.0f, 0.5f, 0.0f));
-	// glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.5f, 0.0f)); // Moved model 0.5 down, so that model will be centered in preview.
 
 	unsigned int projectionLocation = glGetUniformLocation(shader.getProgram(), "projection");
 	unsigned int viewLocation = glGetUniformLocation(shader.getProgram(), "view");
@@ -245,107 +238,16 @@ int opengl_context(GLFWwindow* window) {
 		//
 		// Model rotation
 		default_preview.updateMovement();
-		// bool cameraMoved = false;
-		// if(ImGui::IsWindowFocused() && ImGui::IsMouseDragging(0)) {
-		// 	ImVec2 delta = ImGui::GetMouseDragDelta();
-		// 	const float mouseSensitivity = 0.5;
-		// 	cameraRotation.x -= delta.x * mouseSensitivity;
-		// 	cameraRotation.y += delta.y * mouseSensitivity;
-		// 	if (cameraRotation.y <= -89.9f) {
-		// 		cameraRotation.y = -89.9f;
-		// 	} else if (cameraRotation.y >= 89.9f) {
-		// 		cameraRotation.y = 89.9f;
-		// 	}
-		// 	ImGui::ResetMouseDragDelta();
-
-		// 	cameraMoved = true;
-		// }
-
-		// float& scrolled_amount = ImGui::GetIO().MouseWheel;
-		// if (ImGui::IsWindowHovered() && scrolled_amount != 0.0f) {
-		// 	// printf("scrolled: %2.2f\n", scrolled_amount);
-		// 	float cameraOffset = scrolled_amount * cameraScrollSpeed;
-		// 	if (cameraOrigin.z + cameraOffset <= 0.0f) {
-		// 		cameraOrigin.z += cameraOffset;
-		// 	}
-
-		// 	cameraMoved = true;
-		// }
-
-		// if (cameraMoved) {
-		// 	glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraRotation.x), glm::vec3(0.0f, 1.0f, 0.0f));
-		// 	rotationMatrix = glm::rotate(rotationMatrix, glm::radians(cameraRotation.y), glm::vec3(1.0f, 0.0f, 0.0f));
-		// 	glm::vec3 cameraPos = glm::vec3(rotationMatrix * glm::vec4(cameraOrigin, 1.0f));
-		// 	default_preview.view = glm::lookAt(cameraPos, -cameraPos, cameraUp);
-		// }
-		//
-		//
-
 		// //
 		// // 3d drawing
-		// glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-		// glEnable(GL_DEPTH_TEST);
-		// glViewport(0, 0, fb_size, fb_size);
-
-		// glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		shader.use();
-		// glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
-		// glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
-		// glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model));
-
 		glUniform1i(heightLocation, 0);
 		glUniform1i(colorLocation, 1);
 		default_preview.draw(node_editor.selectedNode, colorFlagLocation, VAO, gridTrigCount, projectionLocation, viewLocation, modelLocation);
-		// // glBindTexture(GL_TEXTURE_2D, heightmap_texture);
-		// if (activeNode != nullptr) {
-		// 	glUniform1i(colorFlagLocation, !activeNode->dynamc.monochrome);
-
-		// 	if (activeNode->dynamc.monochrome) {
-		// 		glActiveTexture(GL_TEXTURE0);
-		// 		glBindTexture(GL_TEXTURE_2D, activeNode->dynamc.texture);
-		// 	} else {
-		// 		ColorGenerator* generator = (ColorGenerator*)activeNode->generator.get();
-		// 		generator->bindTextures();
-		// 	}
-		// } else {
-		// 	glBindTexture(GL_TEXTURE_2D, 0);
-		// }
-
-		// glBindVertexArray(VAO);
-		// // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		// glDrawArrays(GL_TRIANGLES, 0, gridTrigCount * 3);
-		// // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-		// glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		// // 3d drawing end
-		// //
 
 		ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)default_preview.fbTexture, ImVec2(pos.x, pos.y), ImVec2(pos.x + size.x, pos.y + size.y), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
 		ImGui::End(); // Teren
-		
-		// if (!previewed_nodes.empty()) {
-		// 	for (const int& id : previewed_nodes) {
-		// 		char name[100] = "";
-		// 		sprintf(name, "texure %d", id);
-		// 		const char* window_id = (const char*)name;
-
-		// 		// Turns out, windows should'n be created this way.
-		// 		ImGui::Begin(window_id);
-		// 		pos = ImGui::GetWindowPos();
-		// 		size = ImGui::GetWindowSize();
-		// 		int img_size = size.x < size.y ? size.x : size.y;
-		// 		pos.x += size.y < size.x ? (size.x - size.y) / 2 : 0;
-		// 		pos.y += size.x < size.y ? (size.y - size.x) / 2 : 0;
-		// 		shared_ptr<UiNode> node = node_editor.getNode(id);
-
-		// 		// ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)node->dynamc.texture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
-		// 		ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)fbTexture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
-		// 		ImGui::Text("texture %d", id);
-		// 		ImGui::End();
-		// 	}
-		// }
 
 
 		if (!previewed_nodes.empty()) {
@@ -376,9 +278,6 @@ int opengl_context(GLFWwindow* window) {
 				// size = ImGui::GetWindowSize();
 
 				shader.use();
-				// glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
-				// glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
-				// glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model));
 
 				glUniform1i(heightLocation, 0);
 				glUniform1i(colorLocation, 1);
@@ -518,28 +417,6 @@ int opengl_context(GLFWwindow* window) {
 			}
 		}
 		ImGui::End();
-
-		// if (!node_editor.previewedNodes.empty()) {
-		// 	for (const int& id : node_editor.previewedNodes) {
-		// 		char name[100] = "";
-		// 		sprintf(name, "texure %d", id);
-		// 		const char* window_id = (const char*)name;
-
-		// 		// Turns out, windows should'n be created this way.
-		// 		ImGui::Begin(window_id);
-		// 		pos = ImGui::GetWindowPos();
-		// 		size = ImGui::GetWindowSize();
-		// 		int img_size = size.x < size.y ? size.x : size.y;
-		// 		pos.x += size.y < size.x ? (size.x - size.y) / 2 : 0;
-		// 		pos.y += size.x < size.y ? (size.y - size.x) / 2 : 0;
-		// 		shared_ptr<UiNode> node = node_editor.getNode(id);
-		// 		// ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)node->dynamc.texture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
-		// 		ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)fbTexture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
-		// 		ImGui::Text("texture %d", id);
-		// 		ImGui::End();
-		// 	}
-		// }
-		
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
