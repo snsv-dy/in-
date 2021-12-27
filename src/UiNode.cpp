@@ -23,6 +23,7 @@ UiNode::UiNode(const json& json_data): dynamc{texWidth, texWidth, json_data["typ
 		case 5: generator = move(make_unique<ErosionGenerator>()); break;
 		case 6: generator = move(make_unique<CPUErosion>()); break;
 		case 7: generator = move(make_unique<DropletErosion>()); break;
+		case 8: generator = move(make_unique<TerraceGenerator>()); break;
 	}
 
 	this->generator->setTexture(&dynamc);

@@ -176,11 +176,6 @@ int opengl_context(GLFWwindow* window) {
 
 	int dw = 512;
 	DynamcTexture dynamc(dw, dw);
-	// dynamc.gen();
-
-	// SinGenerator sigen(&dynamc, dw, dw);
-	// GradGenerator sigen(&dynamc, dw, dw);
-	// sigen.gen();
 	
 	ImGui::GetStyle().ScaleAllSizes(1.5f);
 

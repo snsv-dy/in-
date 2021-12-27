@@ -30,6 +30,7 @@
 #include "CPUErosion.hpp"
 #include "UiNode.hpp"
 #include "DropletErosion.hpp"
+#include "TerraceGenerator.hpp"
 
 using namespace std;
 using json = nlohmann::json;

@@ -26,6 +26,7 @@
 #include "ErosionGenerator.hpp"
 #include "CPUErosion.hpp"
 #include "DropletErosion.hpp"
+#include "TerraceGenerator.hpp"
 
 using namespace std;
 using json = nlohmann::json;

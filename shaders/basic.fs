@@ -15,7 +15,7 @@ uniform bool colorData;
 float elevationFunc(vec2 pos);
 
 vec3 getNorm(vec2 pos) {
-	const float step = 0.03;
+	const float step = 0.01;
 	float R = elevationFunc(pos + vec2(step, 0.0));
 	float L = elevationFunc(pos - vec2(step, 0.0));
 	float T = elevationFunc(pos + vec2(0.0, step));
