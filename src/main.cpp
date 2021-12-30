@@ -21,8 +21,9 @@
 
 #include <imnodes/imnodes.h>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+
+// #define STB_IMAGE_WRITE_IMPLEMENTATION
+// #include <stb_image_write.h>
 
 #include "NodeEditor.hpp"
 #include "Shader.hpp"
@@ -32,6 +33,12 @@
 // #include "ColorGenerator.hpp"
 
 #include "Preview.hpp"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image_write.h>
 
 int screen_width = 1200;
 int screen_height = 1000;
@@ -83,6 +90,7 @@ int opengl_context(GLFWwindow* window) {
 		printf("Failed to initialize GLAD\n");
 		return -1;
 	}
+	stbi_flip_vertically_on_write(1);
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -187,6 +195,8 @@ int opengl_context(GLFWwindow* window) {
 	map<int, shared_ptr<Preview>> previews;
 	set<int> previewed_nodes;
 
+	// bool save_dialog_opened = false;
+
 	while (!glfwWindowShouldClose(window)) {
 		
 
@@ -213,6 +223,11 @@ int opengl_context(GLFWwindow* window) {
 			ImGuiFileDialog::Instance()->OpenDialog("SaveProject", "Choose File", ".json,.*", ".", "", 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
 			printf("save\n");
 		}
+
+		if (ImGui::MenuItem("Exportuj heightpamę")) {
+			ImGuiFileDialog::Instance()->OpenDialog("ExportImage", "Choose File", ".png,.*", ".", "", 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
+		}
+
 		// ImGui::MenuItem("Zapisz jako");
 		// ImGui::MenuItem("Ostatnie pliki");
 		ImGui::EndMainMenuBar();
@@ -365,6 +380,18 @@ int opengl_context(GLFWwindow* window) {
 			ImGuiFileDialog::Instance()->Close();
 		}
 
+		if (ImGuiFileDialog::Instance()->Display("ExportImage")) {
+			if (ImGuiFileDialog::Instance()->IsOk()) {
+				if (activeNode != nullptr) {
+					activeNode->dynamc.save(ImGuiFileDialog::Instance()->GetFilePathName().c_str());
+				}
+				// node_editor.load();
+				// project_name = "[" + ImGuiFileDialog::Instance()->GetCurrentFileName() + "]";
+				// glfwSetWindowTitle(window, project_name.c_str());
+			}
+
+			ImGuiFileDialog::Instance()->Close();
+		}
 
 		//
 		// Node editor

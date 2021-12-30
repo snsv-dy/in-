@@ -211,6 +211,7 @@ void NodeEditor::addNode(const int& type, int id, ImVec2 position) {
 		case 6: generator = make_unique<CPUErosion>(); break;
 		case 7: generator = make_unique<DropletErosion>(); break;
 		case 8: generator = make_unique<TerraceGenerator>(); break;
+		case 9: generator = make_unique<ImageGenerator>(); break;
 	}
 
 	shared_ptr<UiNode> node = make_shared<UiNode>(move(generator), type == 3 ? false : true);
@@ -324,6 +325,11 @@ void NodeEditor::draw(bool* new_preview, int* new_preview_id) {
 		if (ImGui::MenuItem("Terraces")) {
 			addingNode = true;
 			type = 8;
+		} 
+		
+		if (ImGui::MenuItem("Load heightmap")) {
+			addingNode = true;
+			type = 9;
 		} 
 
 		if (addingNode) {

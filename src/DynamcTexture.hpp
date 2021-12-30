@@ -3,6 +3,9 @@
 
 #include <glad/glad.h>
 
+// #define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image_write.h>
+
 using namespace std;
 
 class DynamcTexture {
@@ -44,6 +47,33 @@ public:
 		GLuint color_type = monochrome ? GL_RED : GL_RGB;
 		glTexImage2D(GL_TEXTURE_2D, 0, color_type, 	width, height, 0, color_type, GL_FLOAT, data);
 		// glGenerateMipmap
+	}
+
+	// void updateGLFrom(unsigned char* data) {
+	// 	glBindTexture(GL_TEXTURE_2D, texture);
+	// 	GLuint color_type = monochrome ? GL_RED : GL_RGB;
+	// 	glTexImage2D(GL_TEXTURE_2D, 0, color_type, 	width, height, 0, color_type, GL_FLOAT, data);
+	// }
+
+	void save(const char* filename) {
+		int mono = (monochrome ? 1 : 3);
+		int buffer_size = width * height * mono;
+		unsigned char* byte_data = new unsigned char[buffer_size];
+
+		// convert float to bytes
+		for (int y = 0; y < height; y++) {
+			int yi = y * width * mono;
+			for (int x = 0; x < width * mono; x++) {
+				byte_data[yi + x] = (unsigned char)(data[yi + x] * 255.0f);
+			}
+		}
+
+		int write_result = stbi_write_png(filename, width, height, mono, byte_data, width * mono);
+		if (write_result == 0) {
+			printf("Texture saving failed\n");
+		}
+
+		delete[] byte_data;
 	}
 
 	void gen() {

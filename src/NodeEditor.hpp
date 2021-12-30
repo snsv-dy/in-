@@ -31,6 +31,7 @@
 #include "UiNode.hpp"
 #include "DropletErosion.hpp"
 #include "TerraceGenerator.hpp"
+#include "ImageGenerator.hpp"
 
 using namespace std;
 using json = nlohmann::json;

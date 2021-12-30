@@ -8,15 +8,15 @@ private:
 	int current_i = 0;
 public:
 	DynamcTexture* input1 = nullptr;
-	int iter_per_gen = 500;
-	int n_iterations = 1000;
+	int n_iterations = 500;
+	int iter_per_gen = 1000;
 
 	bool drawGui() {
 		bool changed = false;
 
 		ImGui::DragInt("iterations", &n_iterations);
 		ImGui::DragInt("iterations multiplier", &iter_per_gen);
-		
+		ImGui::Separator();
 		ImGui::DragFloat("capacityParam", &capacityParam, 0.01f);
 		ImGui::DragFloat("minCapacity", &minCapacity, 0.01f);
 		ImGui::DragFloat("depositionRate", &depositionRate, 0.01f);
@@ -261,16 +261,38 @@ public:
 		return false;
 	}
 
-
 	json serialize() {
 		json result;
 		// result["type"] = type;
+		result["n_iterations"] = n_iterations;
+		result["iter_per_gen"] = iter_per_gen;
+		result["capacityParam"] = capacityParam;
+		result["minCapacity"] = minCapacity;
+		result["depositionRate"] = depositionRate;
+		result["erosionRate"] = erosionRate;
+		result["evaporationRate"] = evaporationRate;
+		result["gravity"] = gravity;
+		result["inertia"] = inertia;
+		result["startWater"] = startWater;
+		result["startSpeed"] = startSpeed;
 
 		return result;
 	}
 
 	void unpackParams(const json& json_data) {
 		// type = json_data.at("type");
+
+		n_iterations = json_data.at("n_iterations");
+		iter_per_gen = json_data.at("iter_per_gen");
+		capacityParam = json_data.at("capacityParam");
+		minCapacity = json_data.at("minCapacity");
+		depositionRate = json_data.at("depositionRate");
+		erosionRate = json_data.at("erosionRate");
+		evaporationRate = json_data.at("evaporationRate");
+		gravity = json_data.at("gravity");
+		inertia = json_data.at("inertia");
+		startWater = json_data.at("startWater");
+		startSpeed = json_data.at("startSpeed");
 	}
 };
 

@@ -18,15 +18,6 @@
 #include "DynamcTexture.hpp"
 
 #include "Generator.hpp"
-#include "SinGen.hpp"
-#include "GradGen.hpp"
-#include "CombinerGenerator.hpp"
-#include "ColorGenerator.hpp"
-#include "NoiseGenerator.hpp"
-#include "ErosionGenerator.hpp"
-#include "CPUErosion.hpp"
-#include "DropletErosion.hpp"
-#include "TerraceGenerator.hpp"
 
 using namespace std;
 using json = nlohmann::json;

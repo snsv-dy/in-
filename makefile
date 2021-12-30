@@ -13,7 +13,7 @@ LOCAL_OBJS = $(addsuffix .o, $(basename $(notdir $(SRC))))
 LOCAL_OBJS := $(LOCAL_OBJS:%.o=$(OBJ_DIR)/%.o)
 
 SRC += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/backends/imgui_impl_glfw.cpp $(IMGUI_DIR)/backends/imgui_impl_opengl3.cpp
-SRC += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
+SRC += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp $(IMGUI_DIR)/misc/cpp/imgui_stdlib.cpp
 SRC += $(IMDIALOG_DIR)/ImGuiFileDialog.cpp
 SRC += include/imnodes/imnodes.cpp
 OBJS = $(addsuffix .o, $(basename $(notdir $(SRC))))
@@ -42,6 +42,9 @@ $(OBJ_DIR)/%.o:$(IMGUI_DIR)/%.cpp
 	$(CC) $(CCFLAGS) -c -o $@ $<
 
 $(OBJ_DIR)/%.o:$(IMGUI_DIR)/backends/%.cpp
+	$(CC) $(CCFLAGS) -c -o $@ $<
+# for string in text input input only
+$(OBJ_DIR)/%.o:$(IMGUI_DIR)/misc/cpp/%.cpp
 	$(CC) $(CCFLAGS) -c -o $@ $<
 
 $(OBJ_DIR)/%.o:$(IMDIALOG_DIR)/%.cpp

@@ -9,6 +9,7 @@
 #include <imgui.h>
 
 #include "UiNode.hpp"
+#include "ColorGenerator.hpp"
 
 using namespace std;
 
