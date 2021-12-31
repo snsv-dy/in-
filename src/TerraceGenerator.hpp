@@ -110,8 +110,8 @@ private:
 	}
 
 	void unpackParams(const json& json_data) {
-		nTerraces = json_data["n_terraces"];
-		slopeAngle = json_data["slope_angle"];
+		nTerraces = json_data.at("n_terraces");
+		slopeAngle = json_data.at("slope_angle");
 	}
 };
 

@@ -43,6 +43,8 @@ public:
 			unpackParams(json_data);
 		} catch (const nlohmann::detail::out_of_range& e) {
 			printf("Node unpacking error: %s\n", e.what());
+		} catch (const nlohmann::detail::type_error& e) {
+			printf("Node unpacking error (corrupted data): %s\n", e.what());
 		}
 	}
 

@@ -99,6 +99,9 @@ void NodeEditor::load(const string& filename) {
 			links_id = json_data["links_id"];
 
 			for (const json& node : json_data["nodes"] ) {
+				int id = node.at("id");
+				int type = node.at("type");
+				printf("Unpacking %d, type: %d\n", id, type);
 				unpackNode(node);
 			}
 
@@ -189,7 +192,6 @@ void NodeEditor::refreshAll() {
 
 void NodeEditor::unpackNode(const json& json_node) {
 	shared_ptr<UiNode> node = make_shared<UiNode>(json_node);
-
 	ImVec2 position {json_node["position"]["x"], json_node["position"]["y"]};
 	ImNodes::SetNodeGridSpacePos(node->id, position);
 	nodes[node->id] = node;

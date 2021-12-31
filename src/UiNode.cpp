@@ -13,7 +13,20 @@ UiNode::UiNode(unique_ptr<Generator> generator, bool monochromeTexture = true): 
 
 UiNode::UiNode(const json& json_data): dynamc{texWidth, texWidth, json_data["type"] != 3} {
 	int type = json_data["type"];
-
+	
+	// This is constructor for json exracted data so it doesn't get generator from NodeEditor.
+	switch (type) {
+		case 0: generator = move(make_unique<SinGenerator>()); break;
+		case 1: generator = move(make_unique<GradGenerator>()); break;
+		case 2: generator = move(make_unique<CombinerGenerator>()); break;
+		case 3: generator = move(make_unique<ColorGenerator>()); break;
+		case 4: generator = move(make_unique<NoiseGenerator>()); break;
+		case 5: generator = move(make_unique<ErosionGenerator>()); break;
+		case 6: generator = move(make_unique<CPUErosion>()); break;
+		case 7: generator = move(make_unique<DropletErosion>()); break;
+		case 8: generator = move(make_unique<TerraceGenerator>()); break;
+		case 9: generator = move(make_unique<ImageGenerator>()); break;
+	}
 	this->generator->setTexture(&dynamc);
 	this->generator->unpackParamsWrap(json_data["generator"]);
 

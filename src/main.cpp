@@ -40,6 +40,9 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
+#include <stb_image_resize.h>
+
 int screen_width = 1200;
 int screen_height = 1000;
 const char* glsl_version = "#version 460";
