@@ -4,6 +4,7 @@ in vec3 pos;
 out vec3 position;
 out vec2 texPos;
 out vec3 color;
+out vec3 norm;
 
 uniform mat4 projection;
 uniform mat4 view;
@@ -22,6 +23,41 @@ float remap( float minval, float maxval, float curval )
 {
     return ( curval - minval ) / ( maxval - minval );
 } 
+
+vec3 getNorm(vec2 pos) {
+	const float step = 0.01;
+	// const float step = 4.0 / 512.0;
+	float R = texture(heightmapTexture, pos + vec2(step, 0.0)).r;
+	float L = texture(heightmapTexture, pos - vec2(step, 0.0)).r;
+	float T = texture(heightmapTexture, pos + vec2(0.0, step)).r;
+	float B = texture(heightmapTexture, pos - vec2(0.0, step)).r;
+
+	// float R = (textureOffset(heightmapTexture, pos, ivec2(1, 0)).r);
+	//  + 
+	// 			textureOffset(heightmapTexture, pos, ivec2(1, 1)).r + 
+	// 			textureOffset(heightmapTexture, pos, ivec2(1, -1)).r) / 3.0 ;
+
+	// float L = (textureOffset(heightmapTexture, pos, ivec2(-1, 0)).r);
+	//  + 
+	// 			textureOffset(heightmapTexture, pos, ivec2(-1, 1)).r + 
+	// 			textureOffset(heightmapTexture, pos, ivec2(-1, -1)).r) / 3.0 ;
+
+	// float T = (textureOffset(heightmapTexture, pos, ivec2(0, 1)).r);
+	//  + 
+	// 			textureOffset(heightmapTexture, pos, ivec2(1, 1)).r + 
+	// 			textureOffset(heightmapTexture, pos, ivec2(-1, 1)).r) / 3.0 ;
+
+	// float B = (textureOffset(heightmapTexture, pos, ivec2(0, -1)).r);
+	//  + 
+	// 			textureOffset(heightmapTexture, pos, ivec2(1, -1)).r + 
+	// 			textureOffset(heightmapTexture, pos, ivec2(-1, -1)).r) / 3.0 ;
+
+	return normalize(vec3(0.5 * (R - L), step * 2.0, 0.5 * (B - T)));
+	// vec3 u = vec3(0.0, T - B, step);
+	// vec3 v = vec3(step, R - L, 0.0);
+	// return normalize(cross(u, v));
+	//return texture(heightmapTexture, pos / 2.0).r;
+}
 
 void main() {
 	vec3 samples[4];
@@ -45,6 +81,7 @@ void main() {
 	float el = elevationFunc(pos.xz);
 	position.y = texture(heightmapTexture, texPos).r;
 
+	norm = getNorm(texPos);
 
 	float minv = 0.0;
 	float maxv = 1.0;

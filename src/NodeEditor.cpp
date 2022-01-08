@@ -214,9 +214,10 @@ void NodeEditor::addNode(const int& type, int id, ImVec2 position) {
 		case 7: generator = make_unique<DropletErosion>(); break;
 		case 8: generator = make_unique<TerraceGenerator>(); break;
 		case 9: generator = make_unique<ImageGenerator>(); break;
+		case 10: generator = make_unique<AngleColorGenerator>(); break;
 	}
 
-	shared_ptr<UiNode> node = make_shared<UiNode>(move(generator), type == 3 ? false : true);
+	shared_ptr<UiNode> node = make_shared<UiNode>(move(generator), type == 3 || type == 10 ? false : true);
 	node->id = ++current_id;
 
 	node->type_i = type;
@@ -227,7 +228,7 @@ void NodeEditor::addNode(const int& type, int id, ImVec2 position) {
 		colorSelected = NODE_COLOR_GREEN_SELECTED;
 	}
 
-	if (type == 3) {
+	if (type == 3 || type == 10) {
 		node->inputs.push_back(++current_id);
 		color = NODE_COLOR_YELLOW;
 		colorSelected = NODE_COLOR_YELLOW_SELECTED;
@@ -302,6 +303,11 @@ void NodeEditor::draw(bool* new_preview, int* new_preview_id) {
 		if (ImGui::MenuItem("Color")) {
 			addingNode = true;
 			type = 3;
+		} 
+
+		if (ImGui::MenuItem("AngleColor")) {
+			addingNode = true;
+			type = 10;
 		} 
 
 		if (ImGui::MenuItem("OpenSimplex2")) {

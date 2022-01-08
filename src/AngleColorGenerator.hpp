@@ -1,5 +1,5 @@
-#ifndef _COLOR_GENERATOR_HPP_
-#define _COLOR_GENERATOR_HPP_
+#ifndef _ANGLE_COLOR_GENERATOR_HPP_
+#define _ANGLE_COLOR_GENERATOR_HPP_
 
 #include <cmath>
 #include <vector>
@@ -8,24 +8,18 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 #include <glm/glm.hpp>
-#include <FastNoiseLite.h>
 
 #include "Generator.hpp"
+#include "ColorGenerator.hpp"
 
 using namespace std;
 using json = nlohmann::json;
 
-struct colorStep {
-	float threshold;
-	ImVec4 color;
-};
-
-class ColorGenerator : public Generator {
+class AngleColorGenerator : public Generator {
 public:
 	DynamcTexture* input1 = nullptr;
-	FastNoiseLite noise;
-	float noise_frequency = 0.06f;
-	float lerp = 0.25f;
+	vector<float> normalMap;
+	bool outside_gen = true;
 
 	vector<colorStep> colorSteps {
 		{0.0f, {0.2f, 1.0f, 0.05f, 1.0f}},
@@ -35,9 +29,6 @@ public:
 
 	bool drawGui() {
 		bool changed = false;
-		changed |= ImGui::DragFloat("blend", &noise_frequency, 0.001f);
-		changed |= ImGui::DragFloat("lerp", &lerp, 0.01f, .0f, .5f);
-
 		ImGui::BeginTable("colors", 3);
 		for (int i = 0; i < colorSteps.size(); i++) {
 			colorStep& step = colorSteps[i];
@@ -108,128 +99,108 @@ public:
 		}
 
 		if (ImGui::Button("generate") || changed) {
+			outside_gen = false;
 			gen();
 		}
 
 		return changed;
 	}
 
-	float smoothst(const float& x) {
-		return 3.f * x * x - 2.f * x * x * x;
+	void calculateNormal() {
+		printf("terrain0: %.15f", input1->data[0]);
+		const float dist = 1.0f / 512.0f;//1.0f / input1->width;
+		float* datap = input1->data;
+		for (int y = 1; y < input1->height - 1; y++) {
+			// bool yboundary = y == 0 || y == input1->height - 1;
+			int yi = y * input1->width;
+			for (int x = 1; x < input1->width - 1; x++) {
+				// bool xboundary = x == 0 || x == input1->height - 1;
+				float current = input1->data[yi + x];
+
+				// float top = (y > 0) ? input1->data[(y - 1) * input1->width + x] : current;
+				// float bottom = current; //(y < (input1->height - 1)) ? input1->data[(y + 1) * input1->width + x] : current;
+
+				// float left = current; //(x > 0) ? input1->data[yi + x - 1] : current;
+				// float right = current; //(x < input1->width - 1) ? input1->data[yi + x + 1] : current;
+				float top = datap[(y - 1) * 512 + x];
+				float bottom = datap[(y + 1) * 512 + x];
+				float left = datap[y * 512 + x - 1];
+				float right = datap[y * 512 + x + 1];
+				
+				glm::vec3 v = glm::vec3(0.0f, top - bottom, dist);
+				glm::vec3 u = glm::vec3(dist, right - left, 0.0f);
+				glm::vec3 n = glm::cross(v, u);
+				n /= sqrtf(n.x * n.x + n.y * n.y + n.z * n.z);
+				// glm::vec3 n = glm::normalize(glm::vec3(dist * (right - left), dist * (bottom - top), 1.0f));
+				float angle = glm::dot(n, glm::vec3(0.0f, 1.0f, 0.0f));
+				normalMap[yi + x] = acos(n[1]) / 3.141592 * 2.0f;
+				// normalMap[yi + x] = 1.0f - n.y;//glm::length(n);
+				// printf("%2.2f ", angle);
+				// printf("v: %2.2f %2.2f %2.2f %2.2f %2.2f\n", v.x, v.y, v.z, top, bottom);
+				// printf("u: %2.2f %2.2f %2.2f\n", u.x, u.y, u.z);
+				// printf("n: %2.2f %2.2f %2.2f\n", n.x, n.y, n.z);
+			}
+			// printf("\n");
+		}
 	}
 
 	void gen() {
 		if (dynamc != nullptr && !dynamc->monochrome && input1 != nullptr) {
-			noise.SetFrequency(noise_frequency);
 			const auto [width, height] = dynamc->getSize();
 			float fwidth = (float)width;
 			float fheight = (float)height;
 
+			if (outside_gen) {
+				calculateNormal();
+			}
+
+			// Temp
+			for (int y = 0; y < height; y++) {
+				int yw = y * width;
+
+				for (int x = 0; x < width; x++) {
+					int index = (yw + x);
+					float norm = normalMap[index];
+
+					dynamc->data[index * 3] = norm;
+					dynamc->data[index * 3 + 1] = norm;
+					dynamc->data[index * 3 + 2] = norm;
+				}
+			}
+
+			printf("Gened\n");
+
+			dynamc->updateGL();
+			return;
 			
 			for (int y = 0; y < height; y++) {
 				int yw = y * width;
 
 				for (int x = 0; x < width; x++) {
 					int index = (yw + x);
-					float height = input1->data[index];
-					float rlerp = noise.GetNoise((float)x, (float)y) * .5f + .5f;
-					// rlerp /= 2.0f;
-					// rlerp += 0.5f;
+					float input_value = normalMap[index];
 
-					auto [t1, c1] = colorSteps[0];
-					auto [t2, c2] = colorSteps[1];
-					t1 /= 2.0f; // t1 is 0.0 - 1.0, and for blending should be 0.0 - 0.5
-					float a = t1;
-					float b = 1.0f - t1;
-					float ba = b - a;
+					// for (auto [threshold, color] : colorSteps) {
+					for (int i = 0; i < colorSteps.size(); i++) {
+						auto [threshold, color] = colorSteps[i];
+						if (input_value >= threshold) {
+							ImVec4 result = color;
+							// if (i < colorSteps.size() - 1) {
+							// 	auto [threshold1, next_color] = colorSteps[i + 1];
+							// 	float distance = threshold1 - threshold;
+        					// 	float delta = (input_value - threshold) / distance;
+							// 	result = ImLerp(result, next_color, delta);
+							// }	
 
-					height = height + rlerp * lerp;
-					float blend = 1.0f / ba * (height - a);
-					blend = ImSaturate(blend);
-
-					float left = blend;
-					float right = (1.0f - blend);
-
-					ImVec4 result;
-					// c1 = ImLerp(c1, c2, (right - left) * lerp);
-
-
-					// float height2 = fmin(blend, rlerp);
-					// float blend2 = 1.0f / (1.0f - 2.0f * lerp) * (height2 - lerp);
-					// float height2 = blend == 0.0f || blend == 1.0f ? blend : //.7f + (blend - rlerp) * .3f;
-					// 	// blend > 0.5f ? fmin(1.0f, blend < rlerp): 1.0f;
-					// 	blend > rlerp ? .5f + (blend - rlerp) * .5f : .5f - (rlerp - blend) * .5f;
-					float height2;
-					if (blend == 0.0f || blend == 1.0f) {
-						height2 = blend;
-					} else {
-						height2 = blend;
-						// float blend2 = 1.0f / (1.0f - 2.0f * lerp) * (rlerp - lerp);
-						// blend2 = ImSaturate(blend2);
-
-						// if (blend > rlerp) {
-						// 	// float blend3 = 1.0f / (1.0f - 2.0f * lerp) * (max(rlerp - lerp, 0.f));
-						// 	// blend3 = ImSaturate(blend3);
-						// 	height2 = 1.f;//blend3;	
-						// } else {
-						// 	float blend3 = 1.0f / (1.0f - 2.0f * lerp) * (blend2 - lerp);
-						// 	blend3 = ImSaturate(blend3);
-						// 	height2 = max((1.f - blend2), .0f);	
-						// }
-						// height2 = (blend > rlerp) * (1.f - blend2);// + (1.f - blend2) * (blend >= rlerp);
+							dynamc->data[index * 3] = result.x;
+							dynamc->data[index * 3 + 1] = result.y;
+							dynamc->data[index * 3 + 2] = result.z;
+						}
 					}
-
-					result = ImLerp(c1, c2, height2);
-					dynamc->data[index * 3] = result.x;
-					dynamc->data[index * 3 + 1] = result.y;
-					dynamc->data[index * 3 + 2] = result.z;
-					// if (left - right < rlerp) {
-					// 	// float a2 = fmax(a, lerp);
-					// 	// float ba2 = 1.0f - 2.0f * a2;
-					// 	// float blend2 = 1.0f / ba2 * (height - a2);
-					// 	// blend2 = ImSaturate(blend2);
-					// 	result = ImLerp(c1, c2, left - right);
-					// 	// float l = rlerp;// * rlerp;
-					// 	// float r = 1.0f - rlerp;// * (1.0f - rlerp);
-						
-					// 	// result.x = c2.x * left + c1.x * right;
-					// 	// result.y = c2.y * left + c1.y * right;
-					// 	// result.z = c2.z * left + c1.z * right;
-
-					// 	dynamc->data[index * 3] = result.x;
-					// 	dynamc->data[index * 3 + 1] = result.y;
-					// 	dynamc->data[index * 3 + 2] = result.z;
-					// } else {
-					// 	// result = ImLerp(c2, c1, lerp);
-					// 	dynamc->data[index * 3] = c2.x;
-					// 	dynamc->data[index * 3 + 1] = c2.y;
-					// 	dynamc->data[index * 3 + 2] = c2.z;						
-					// }
-
-					// result.x = c1.x * left + c2.x * right;
-					// result.y = c1.y * left + c2.y * right;
-					// result.z = c1.z * left + c2.z * right;
-
-
-					// for (int i = 0; i < colorSteps.size(); i++) {
-					// 	auto [threshold, color] = colorSteps[i];
-					// 	if (input_value >= threshold) {
-					// 		ImVec4 result = color;
-					// 		if (i < colorSteps.size() - 1) {
-					// 			auto [threshold1, next_color] = colorSteps[i + 1];
-					// 			float distance = threshold1 - threshold;
-        			// 			float delta = (input_value - threshold) / distance;
-					// 			result = result;//ImLerp(result, next_color, delta);
-					// 		}	
-
-					// 		dynamc->data[index * 3] = result.x;
-					// 		dynamc->data[index * 3 + 1] = result.y;
-					// 		dynamc->data[index * 3 + 2] = result.z;
-					// 	}
-					// }
 				}
 			}
 
+			outside_gen = true;
 			dynamc->updateGL();
 		}
 	}
@@ -238,6 +209,10 @@ public:
 		if (index == 0 && input1 == nullptr) {
 			printf("input1 set!\n");
 			input1 = dynamc;
+			if (normalMap.size() != input1->width * input1->height) {
+				normalMap.resize(input1->width * input1->height);
+				calculateNormal();
+			}
 
 			return true;
 		}
@@ -259,7 +234,7 @@ public:
 	}
 
 	const char* getName() {
-		return "Color";
+		return "AngleColor";
 	}
 
 	json serialize() {

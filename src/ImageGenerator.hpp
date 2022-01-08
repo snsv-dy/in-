@@ -138,7 +138,7 @@ public:
 	}
 
 	void unpackParams(const json& json_data) {
-		// seed = json_data.at("seed");
+		src = json_data.at("src");
 	}
 };
 

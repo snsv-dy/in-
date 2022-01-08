@@ -26,6 +26,7 @@ UiNode::UiNode(const json& json_data): dynamc{texWidth, texWidth, json_data["typ
 		case 7: generator = move(make_unique<DropletErosion>()); break;
 		case 8: generator = move(make_unique<TerraceGenerator>()); break;
 		case 9: generator = move(make_unique<ImageGenerator>()); break;
+		case 10: generator = move(make_unique<AngleColorGenerator>()); break;
 	}
 	this->generator->setTexture(&dynamc);
 	this->generator->unpackParamsWrap(json_data["generator"]);
@@ -44,7 +45,7 @@ UiNode::UiNode(const json& json_data): dynamc{texWidth, texWidth, json_data["typ
 		colorSelected = NODE_COLOR_GREEN_SELECTED;
 	}
 
-	if (type == 3) {
+	if (type == 3 || type == 10) {
 		// this->inputs.push_back(++current_id);
 		color = NODE_COLOR_YELLOW;
 		colorSelected = NODE_COLOR_YELLOW_SELECTED;

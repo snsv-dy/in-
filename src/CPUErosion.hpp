@@ -54,10 +54,10 @@ public:
 	}
 
 	bool gradient(float* map, float posx, float posy, float* return_data) {
-		int x = (int)posx;
-		int y = (int)posy;
+		int x = (int)floor(posx);
+		int y = (int)floor(posy);
 		int mapw = 512;
-		if (x > 0 && x < 511 && y > 0 && y < 511) {
+		// if (x > 0 && x < 511 && y > 0 && y < 511) {
 			float NW = map[y * mapw + x];
 			float NE = map[y * mapw + x + 1];
 			float SW = map[(y + 1) * mapw + x];
@@ -76,7 +76,7 @@ public:
 			return_data[2] = height;
 
 			return true;
-		}
+		// }
 
 		return_data[0] = 0.0f;
 		return_data[1] = 0.0f;

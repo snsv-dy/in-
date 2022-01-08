@@ -32,6 +32,7 @@
 #include "DropletErosion.hpp"
 #include "TerraceGenerator.hpp"
 #include "ImageGenerator.hpp"
+#include "AngleColorGenerator.hpp"
 
 using namespace std;
 using json = nlohmann::json;
