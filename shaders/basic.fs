@@ -12,6 +12,7 @@ uniform sampler2D heightmapTexture;
 uniform sampler2D colorTexture;
 
 uniform bool colorData;
+uniform vec3 sunPos;
 
 float elevationFunc(vec2 pos);
 
@@ -58,7 +59,7 @@ float elevationFunc(vec2 pos) {
 
 void main() {
 
-	vec3 sunPos = vec3(4.0, 4.0, 0.0);
+	// sunPos = vec3(0.0, 10.0, 0.0);
 
 	vec3 samples[4];
 	samples[0] = vec3(1.0, 1.0, 0.0);

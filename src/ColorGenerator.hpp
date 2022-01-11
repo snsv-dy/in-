@@ -118,6 +118,10 @@ public:
 		return 3.f * x * x - 2.f * x * x * x;
 	}
 
+	float blendValue(float value, float blend_amount) {
+		return ImSaturate(1.f / (1.f - 2.f * blend_amount) * (value - blend_amount));
+	}
+
 	void gen() {
 		if (dynamc != nullptr && !dynamc->monochrome && input1 != nullptr) {
 			noise.SetFrequency(noise_frequency);
@@ -131,26 +135,47 @@ public:
 
 				for (int x = 0; x < width; x++) {
 					int index = (yw + x);
+					dynamc->data[index * 3] = .0f;
+					dynamc->data[index * 3 + 1] = .0f;
+					dynamc->data[index * 3 + 2] = .0f;
+				}
+			}
+			for (int y = 0; y < height; y++) {
+				int yw = y * width;
+
+				for (int x = 0; x < width; x++) {
+					int index = (yw + x);
 					float height = input1->data[index];
-					float rlerp = noise.GetNoise((float)x, (float)y) * .5f + .5f;
-					// rlerp /= 2.0f;
-					// rlerp += 0.5f;
+					float rlerp = 0.f;//noise.GetNoise((float)x, (float)y) * .5f + .5f;
 
-					auto [t1, c1] = colorSteps[0];
-					auto [t2, c2] = colorSteps[1];
-					t1 /= 2.0f; // t1 is 0.0 - 1.0, and for blending should be 0.0 - 0.5
-					float a = t1;
-					float b = 1.0f - t1;
-					float ba = b - a;
+					// for (int i = 0; i < colorSteps.size() - 1; i++) {
+					for (int i = 0; i < 2; i++) {
+						auto [t1, c1] = colorSteps[i];
+						auto [t2, c2] = colorSteps[i + 1];
+						// t1 /= 2.0f; // t1 is 0.0 - 1.0, and for blending should be 0.0 - 0.5
 
-					height = height + rlerp * lerp;
-					float blend = 1.0f / ba * (height - a);
-					blend = ImSaturate(blend);
+						height = height + (rlerp - .5f) * lerp - (t1 * 2.f - 1.f);
+						// float blend = blendValue(height + (rlerp - .5f) * lerp - (t1 * 2.f - 1.f), .5f);
+						float blend = blendValue(height, .5f);
+						
+						if (height < t1) {
+							ImVec4 result = ImLerp(c1, c2, blend);	
+							dynamc->data[index * 3] = result.x;
+							dynamc->data[index * 3 + 1] = result.y;
+							dynamc->data[index * 3 + 2] = result.z;
+						}
+					}
+					// float a = t1;
+					// float b = 1.0f - t1;
+					// float ba = b - a;
 
-					float left = blend;
-					float right = (1.0f - blend);
+					// float blend = 1.0f / ba * (height - a);
+					// blend = ImSaturate(blend);
 
-					ImVec4 result;
+					// float left = blend;
+					// float right = (1.0f - blend);
+
+					// ImVec4 result;
 					// c1 = ImLerp(c1, c2, (right - left) * lerp);
 
 
@@ -159,11 +184,11 @@ public:
 					// float height2 = blend == 0.0f || blend == 1.0f ? blend : //.7f + (blend - rlerp) * .3f;
 					// 	// blend > 0.5f ? fmin(1.0f, blend < rlerp): 1.0f;
 					// 	blend > rlerp ? .5f + (blend - rlerp) * .5f : .5f - (rlerp - blend) * .5f;
-					float height2;
-					if (blend == 0.0f || blend == 1.0f) {
-						height2 = blend;
-					} else {
-						height2 = blend;
+					// float height2;
+					// if (blend == 0.0f || blend == 1.0f) {
+					// 	height2 = blend;
+					// } else {
+					// 	height2 = blend;
 						// float blend2 = 1.0f / (1.0f - 2.0f * lerp) * (rlerp - lerp);
 						// blend2 = ImSaturate(blend2);
 
@@ -177,12 +202,12 @@ public:
 						// 	height2 = max((1.f - blend2), .0f);	
 						// }
 						// height2 = (blend > rlerp) * (1.f - blend2);// + (1.f - blend2) * (blend >= rlerp);
-					}
+					// }
 
-					result = ImLerp(c1, c2, height2);
-					dynamc->data[index * 3] = result.x;
-					dynamc->data[index * 3 + 1] = result.y;
-					dynamc->data[index * 3 + 2] = result.z;
+					// result = ImLerp(c1, c2, height2);
+					// dynamc->data[index * 3] = result.x;
+					// dynamc->data[index * 3 + 1] = result.y;
+					// dynamc->data[index * 3 + 2] = result.z;
 					// if (left - right < rlerp) {
 					// 	// float a2 = fmax(a, lerp);
 					// 	// float ba2 = 1.0f - 2.0f * a2;

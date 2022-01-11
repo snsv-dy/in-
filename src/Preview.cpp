@@ -30,7 +30,7 @@ Preview::Preview() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);	
 }
 
-void Preview::draw(const shared_ptr<UiNode>& node, unsigned int colorFlagLocation, unsigned int VAO, unsigned int gridTrigCount, unsigned int projectionLocation, unsigned int viewLocation, unsigned int modelLocation) {
+void Preview::draw(const shared_ptr<UiNode>& node, unsigned int colorFlagLocation, unsigned int VAO, unsigned int gridTrigCount, unsigned int projectionLocation, unsigned int viewLocation, unsigned int modelLocation, unsigned int lightPosLocation) {
 	//
 	// 3d drawing
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -44,6 +44,8 @@ void Preview::draw(const shared_ptr<UiNode>& node, unsigned int colorFlagLocatio
 	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
 	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model));
+	// glUniform3fv(lightPosLocation, 1, glm::value_ptr(lightPos));
+	glUniform3f(lightPosLocation, lightPos[0], lightPos[1], lightPos[2]);
 
 	// glUniform1i(heightLocation, 0);
 	// glUniform1i(colorLocation, 1);
@@ -107,6 +109,14 @@ void Preview::updateMovement() {
 		glm::vec3 cameraPos = glm::vec3(rotationMatrix * glm::vec4(cameraOrigin, 1.0f));
 		view = glm::lookAt(cameraPos, -cameraPos, cameraUp);
 	}
+}
+
+void Preview::setLightPos() {
+	glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(cameraRotation.x), glm::vec3(0.0f, 1.0f, 0.0f));
+	rotationMatrix = glm::rotate(rotationMatrix, glm::radians(cameraRotation.y), glm::vec3(1.0f, 0.0f, 0.0f));
+	this->lightPos = glm::vec3(rotationMatrix * glm::vec4(cameraOrigin, 1.0f));
+	lightPos.x *= -1;
+	printf("lightPos: %2.2f %2.2f %2.2f\n", lightPos.x, lightPos.y, lightPos.z);
 }
 
 Preview::~Preview() {

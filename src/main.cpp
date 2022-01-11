@@ -170,6 +170,7 @@ int opengl_context(GLFWwindow* window) {
 	unsigned int projectionLocation = glGetUniformLocation(shader.getProgram(), "projection");
 	unsigned int viewLocation = glGetUniformLocation(shader.getProgram(), "view");
 	unsigned int modelLocation = glGetUniformLocation(shader.getProgram(), "model");
+	unsigned int lightPosLocation = glGetUniformLocation(shader.getProgram(), "sunPos");
 
 	unsigned int heightLocation = glGetUniformLocation(shader.getProgram(), "heightmapTexture");
 	unsigned int colorLocation = glGetUniformLocation(shader.getProgram(), "colorTexture");
@@ -231,6 +232,11 @@ int opengl_context(GLFWwindow* window) {
 			ImGuiFileDialog::Instance()->OpenDialog("ExportImage", "Choose File", ".png,.*", ".", "", 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
 		}
 
+		if (ImGui::MenuItem("Set light position")) {
+			printf("Setting light position\n");
+			default_preview.setLightPos();
+		}
+
 		// ImGui::MenuItem("Zapisz jako");
 		// ImGui::MenuItem("Ostatnie pliki");
 		ImGui::EndMainMenuBar();
@@ -257,7 +263,7 @@ int opengl_context(GLFWwindow* window) {
 		shader.use();
 		glUniform1i(heightLocation, 0);
 		glUniform1i(colorLocation, 1);
-		default_preview.draw(node_editor.selectedNode, colorFlagLocation, VAO, gridTrigCount, projectionLocation, viewLocation, modelLocation);
+		default_preview.draw(node_editor.selectedNode, colorFlagLocation, VAO, gridTrigCount, projectionLocation, viewLocation, modelLocation, lightPosLocation);
 
 		ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)default_preview.fbTexture, ImVec2(pos.x, pos.y), ImVec2(pos.x + size.x, pos.y + size.y), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
 		ImGui::End(); // Teren
@@ -298,7 +304,7 @@ int opengl_context(GLFWwindow* window) {
 				if (previews.find(id) != previews.end()) {
 					shared_ptr<Preview> preview = previews[id];
 					preview->updateMovement();
-					preview->draw(node, colorFlagLocation, VAO, gridTrigCount, projectionLocation, viewLocation, modelLocation);
+					preview->draw(node, colorFlagLocation, VAO, gridTrigCount, projectionLocation, viewLocation, modelLocation, lightPosLocation);
 					ImGui::Image((void *)(intptr_t)preview->fbTexture, {img_size, img_size}, ImVec2(0, 1), ImVec2(1, 0));
 				} else {
 					ImGui::Text("No preview");
@@ -327,7 +333,7 @@ int opengl_context(GLFWwindow* window) {
 			}
 		}
 
-		ImGui::Begin("Paramz");
+		ImGui::Begin("Parameters");
 		ImGui::Text("previews size: %d", previews.size());
 		ImGui::Text("previewed nodes size: %d", previewed_nodes.size());
 		ImGui::Text("pos: %f %f", pos.x, pos.y);
