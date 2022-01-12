@@ -57,6 +57,7 @@ std::pair<unsigned int, unsigned int> createBufferForGridSize(unsigned int size)
 void setBufferData(unsigned int VAO, unsigned int VBO, float* data, unsigned int dataSize);
 void setFlatGrid(float* data, unsigned int size);
 unsigned int loadTexture(const std::string& filename, unsigned int& width, unsigned int& height);
+void exportObj(const std::string filename, DynamcTexture* texture);
 
 int main() {
 	GLFWwindow* window;
@@ -228,8 +229,14 @@ int opengl_context(GLFWwindow* window) {
 			printf("save\n");
 		}
 
-		if (ImGui::MenuItem("Exportuj heightpamę")) {
+		if (ImGui::MenuItem("Export heightmap")) {
 			ImGuiFileDialog::Instance()->OpenDialog("ExportImage", "Choose File", ".png,.*", ".", "", 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
+		}
+
+		if (ImGui::MenuItem("Export as obj model")) {
+			if (activeNode != nullptr) {
+				ImGuiFileDialog::Instance()->OpenDialog("ExportModel", "Choose File", ".obj,.*", ".", "", 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
+			}
 		}
 
 		if (ImGui::MenuItem("Set light position")) {
@@ -397,6 +404,17 @@ int opengl_context(GLFWwindow* window) {
 				// node_editor.load();
 				// project_name = "[" + ImGuiFileDialog::Instance()->GetCurrentFileName() + "]";
 				// glfwSetWindowTitle(window, project_name.c_str());
+			}
+
+			ImGuiFileDialog::Instance()->Close();
+		}
+
+
+		if (ImGuiFileDialog::Instance()->Display("ExportModel")) {
+			if (ImGuiFileDialog::Instance()->IsOk()) {
+				if (activeNode != nullptr) {
+					exportObj(ImGuiFileDialog::Instance()->GetFilePathName(), &activeNode->dynamc);
+				}
 			}
 
 			ImGuiFileDialog::Instance()->Close();
@@ -589,4 +607,46 @@ unsigned int loadTexture(const std::string& filename, unsigned int& width, unsig
 	stbi_image_free(tex_ptr);
 	
 	return texture;
+}
+
+void exportObj(const std::string filename, DynamcTexture* texture) {
+	if (texture != nullptr) {
+		ofstream out_file (filename);
+	if (out_file.is_open()) {
+		
+		// vertices
+		float finc = 1.f / texture->width;
+		float fy = 0.f;
+		for (int y = 0; y < texture->height; y++, fy += finc) {
+			float fx = 0.f;
+			int yw = y * texture->width;
+			for (int x = 0; x < texture->width; x++, fx += finc) {
+				const float& val = texture->data[yw + x];
+				out_file << std::fixed << std::setprecision(6) << "v " << fx << " " << val << " " << fy << "\n";
+			}
+		}
+		
+		out_file << "\n";
+
+		// faces 
+		// float finc = 1.f;
+		// float fy = 0.f;
+		for (int y = 0; y < texture->height - 1; y++) {
+			int yw = y * texture->width;
+			for (int x = 0; x < texture->width - 1; x++) {
+				int index = yw + x + 1;
+				out_file <<  "f " << (index + 1) << " " << (index + texture->width + 1) << " " << (index + texture->width) << "\n";
+				out_file <<  "f " << (index + 1) << " " << (index + texture->width) << " " << (index) << "\n";
+			}
+		}
+		if (out_file.bad()) {
+			printf("[Obj] Out file bad\n");	
+		}
+		out_file.close();
+	} else {
+		printf("[Obj] Can't open file\n");
+	}
+	} else {
+		printf("[Obj] Provided texture is null\n");
+	}
 }
