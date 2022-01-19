@@ -67,7 +67,7 @@ void NodeEditor::save(const string& filename) {
 	if (out_file.is_open()) {
 		out_file << setw(4) << json_data;
 		if (out_file.bad()) {
-			printf("Out file bad\n");	
+			printf("Error while writing to file\n");	
 		}
 		out_file.close();
 	} else {
@@ -209,9 +209,9 @@ void NodeEditor::addNode(const int& type, int id, ImVec2 position) {
 		case 2: generator = make_unique<CombinerGenerator>(); break;
 		case 3: generator = make_unique<ColorGenerator>(); break;
 		case 4: generator = make_unique<NoiseGenerator>(); break;
-		case 5: generator = make_unique<ErosionGenerator>(); break;
+		// case 5: generator = make_unique<ErosionGenerator>(); break;
 		case 6: generator = make_unique<CPUErosion>(); break;
-		case 7: generator = make_unique<DropletErosion>(); break;
+		// case 7: generator = make_unique<DropletErosion>(); break;
 		case 8: generator = make_unique<TerraceGenerator>(); break;
 		case 9: generator = make_unique<ImageGenerator>(); break;
 		case 10: generator = make_unique<AngleColorGenerator>(); break;
@@ -236,6 +236,8 @@ void NodeEditor::addNode(const int& type, int id, ImVec2 position) {
 
 	if (type == 5 || type == 6 || type == 7 || type == 8) {
 		node->inputs.push_back(++current_id);
+		color = NODE_COLOR_GREEN;
+		colorSelected = NODE_COLOR_GREEN_SELECTED;
 	}
 
 	node->outputs.push_back(++current_id);
@@ -305,30 +307,30 @@ void NodeEditor::draw(bool* new_preview, int* new_preview_id) {
 			type = 3;
 		} 
 
-		if (ImGui::MenuItem("AngleColor")) {
-			addingNode = true;
-			type = 10;
-		} 
+		// if (ImGui::MenuItem("AngleColor")) {
+		// 	addingNode = true;
+		// 	type = 10;
+		// } 
 
-		if (ImGui::MenuItem("OpenSimplex2")) {
+		if (ImGui::MenuItem("Noise")) {
 			addingNode = true;
 			type = 4;
 		} 
 
-		if (ImGui::MenuItem("Erosion")) {
-			addingNode = true;
-			type = 5;
-		} 
+		// if (ImGui::MenuItem("Erosion")) {
+		// 	addingNode = true;
+		// 	type = 5;
+		// } 
 
-		if (ImGui::MenuItem("Erosion2")) {
+		if (ImGui::MenuItem("Erosion")) {
 			addingNode = true;
 			type = 6;
 		} 
 
-		if (ImGui::MenuItem("DropletErosion")) {
-			addingNode = true;
-			type = 7;
-		} 
+		// if (ImGui::MenuItem("DropletErosion")) {
+		// 	addingNode = true;
+		// 	type = 7;
+		// } 
 
 		if (ImGui::MenuItem("Terraces")) {
 			addingNode = true;

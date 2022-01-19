@@ -220,11 +220,11 @@ int opengl_context(GLFWwindow* window) {
 		}
 
 		ImGui::BeginMainMenuBar();
-		if (ImGui::MenuItem("Otwórz")) {
+		if (ImGui::MenuItem("Open project")) {
 			ImGuiFileDialog::Instance()->OpenDialog("OpenProject", "Choose File", ".json,.*", ".");
 		}
 
-		if (ImGui::MenuItem("Zapisz jako", "CTRL+S")) {
+		if (ImGui::MenuItem("Save project", "CTRL+S")) {
 			ImGuiFileDialog::Instance()->OpenDialog("SaveProject", "Choose File", ".json,.*", ".", "", 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
 			printf("save\n");
 		}
@@ -325,7 +325,7 @@ int opengl_context(GLFWwindow* window) {
 				// size = ImGui::GetWindowSize();
 
 				if (node != nullptr) {
-					ImGui::Image((void *)(intptr_t)node->dynamc.texture, {img_size, img_size}, ImVec2(0, 1), ImVec2(1, 0));
+					ImGui::Image((void *)(intptr_t)node->dynamc.texture, {img_size, img_size}, ImVec2(1, 1), ImVec2(0, 0));
 				}
 
 				ImGui::EndChild();
@@ -341,24 +341,24 @@ int opengl_context(GLFWwindow* window) {
 		}
 
 		ImGui::Begin("Parameters");
-		ImGui::Text("previews size: %d", previews.size());
-		ImGui::Text("previewed nodes size: %d", previewed_nodes.size());
-		ImGui::Text("pos: %f %f", pos.x, pos.y);
-		ImGui::Text("size: %f %f", size.x, size.y);
-		ImGui::Checkbox("keyCtrl", &ImGui::GetIO().KeyCtrl);
-		ImGui::Text("Links size: %d\n", node_editor.getLinksSize());
-		ImGui::Text("Camera rotation: %d\n", node_editor.getLinksSize());
-		ImGui::Text("cameraRotation: %2.2f %2.2f\n", default_preview.cameraRotation.x, default_preview.cameraRotation.y);
-		ImGui::Text("cameraOrigin: %2.2f %2.2f %2.2f\n", default_preview.cameraOrigin.x, default_preview.cameraOrigin.y, default_preview.cameraOrigin.z);
-		ImGui::Text("cameraUp: %2.2f %2.2f %2.2f\n", default_preview.cameraUp.x, default_preview.cameraUp.y, default_preview.cameraUp.z);
-		node_editor.debgz();
-		if (ImGui::Button("Save nodes")) {
-			node_editor.save();
-		}
+		// ImGui::Text("previews size: %d", previews.size());
+		// ImGui::Text("previewed nodes size: %d", previewed_nodes.size());
+		// ImGui::Text("pos: %f %f", pos.x, pos.y);
+		// ImGui::Text("size: %f %f", size.x, size.y);
+		// ImGui::Checkbox("keyCtrl", &ImGui::GetIO().KeyCtrl);
+		// ImGui::Text("Links size: %d\n", node_editor.getLinksSize());
+		// ImGui::Text("Camera rotation: %d\n", node_editor.getLinksSize());
+		// ImGui::Text("cameraRotation: %2.2f %2.2f\n", default_preview.cameraRotation.x, default_preview.cameraRotation.y);
+		// ImGui::Text("cameraOrigin: %2.2f %2.2f %2.2f\n", default_preview.cameraOrigin.x, default_preview.cameraOrigin.y, default_preview.cameraOrigin.z);
+		// ImGui::Text("cameraUp: %2.2f %2.2f %2.2f\n", default_preview.cameraUp.x, default_preview.cameraUp.y, default_preview.cameraUp.z);
+		// node_editor.debgz();
+		// if (ImGui::Button("Save nodes")) {
+		// 	node_editor.save();
+		// }
 
-		if (ImGui::Button("Load nodes")) {
-			node_editor.load();
-		}
+		// if (ImGui::Button("Load nodes")) {
+		// 	node_editor.load();
+		// }
 
 		// if (ImGui::SliderFloat("Divider", &dynamc.divider, 0.0f, 300.0f)) {
 		// 	dynamc.gen();
@@ -368,6 +368,8 @@ int opengl_context(GLFWwindow* window) {
 			if (activeNode->drawGui()) {
 				node_editor.nodesChanged({activeNode->id});
 			}
+		} else {
+			ImGui::Text("Select node to show its parameters");
 		}
 		ImGui::End(); // Paramz?
 
@@ -462,7 +464,7 @@ int opengl_context(GLFWwindow* window) {
 				ImGui::Image((void *)(intptr_t)gen->compute_texture, {img_size, img_size}, ImVec2(0, 1), ImVec2(1, 0), ImVec4(1.0f, 0.0, 0.0f, 1.0f));
 				ImGui::Image((void *)(intptr_t)gen->debug_texture, {img_size, img_size}, ImVec2(0, 1), ImVec2(1, 0), ImVec4(1.0f, 0.0, 1.0f, 1.0f));
 			} else {
-				ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)activeNode->dynamc.texture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(0, 1), ImVec2(1, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
+				ImGui::GetWindowDrawList()->AddImage((void *)(intptr_t)activeNode->dynamc.texture, ImVec2(pos.x, pos.y), ImVec2(pos.x + img_size, pos.y + img_size), ImVec2(1, 1), ImVec2(0, 0)); // uv changed (imgui assumes that 0,0 is top left, and opengl bottom left).
 			}
 		}
 		ImGui::End();

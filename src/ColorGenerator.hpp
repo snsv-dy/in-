@@ -149,16 +149,16 @@ public:
 					float rlerp = 0.f;//noise.GetNoise((float)x, (float)y) * .5f + .5f;
 
 					// for (int i = 0; i < colorSteps.size() - 1; i++) {
-					for (int i = 0; i < 2; i++) {
+					for (int i = 0; i < 1; i++) {
 						auto [t1, c1] = colorSteps[i];
 						auto [t2, c2] = colorSteps[i + 1];
 						// t1 /= 2.0f; // t1 is 0.0 - 1.0, and for blending should be 0.0 - 0.5
-
-						height = height + (rlerp - .5f) * lerp - (t1 * 2.f - 1.f);
-						// float blend = blendValue(height + (rlerp - .5f) * lerp - (t1 * 2.f - 1.f), .5f);
-						float blend = blendValue(height, .5f);
 						
-						if (height < t1) {
+						// height = height + (rlerp - .5f);// * lerp - (t1 * 2.f - 1.f);
+						// float blend = blendValue(height + (rlerp - .5f) * lerp - (t1 * 2.f - 1.f), .5f);
+						float blend = blendValue(height - t1, lerp);
+						
+						if (height >= t1) {
 							ImVec4 result = ImLerp(c1, c2, blend);	
 							dynamc->data[index * 3] = result.x;
 							dynamc->data[index * 3 + 1] = result.y;

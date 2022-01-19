@@ -21,9 +21,9 @@ UiNode::UiNode(const json& json_data): dynamc{texWidth, texWidth, json_data["typ
 		case 2: generator = move(make_unique<CombinerGenerator>()); break;
 		case 3: generator = move(make_unique<ColorGenerator>()); break;
 		case 4: generator = move(make_unique<NoiseGenerator>()); break;
-		case 5: generator = move(make_unique<ErosionGenerator>()); break;
+		// case 5: generator = move(make_unique<ErosionGenerator>()); break;
 		case 6: generator = move(make_unique<CPUErosion>()); break;
-		case 7: generator = move(make_unique<DropletErosion>()); break;
+		// case 7: generator = move(make_unique<DropletErosion>()); break;
 		case 8: generator = move(make_unique<TerraceGenerator>()); break;
 		case 9: generator = move(make_unique<ImageGenerator>()); break;
 		case 10: generator = move(make_unique<AngleColorGenerator>()); break;
@@ -38,7 +38,7 @@ UiNode::UiNode(const json& json_data): dynamc{texWidth, texWidth, json_data["typ
 	ImU32 color = NODE_COLOR_DEFAULT;
 	ImU32 colorSelected = NODE_COLOR_DEFAULT_SELECTED;
 
-	if (type == 2) {
+	if (type == 5 || type == 6 || type == 7 || type == 8) {
 		// this->inputs.push_back(++current_id);
 		// this->inputs.push_back(++current_id);
 		color = NODE_COLOR_GREEN;
@@ -72,10 +72,10 @@ void UiNode::setColors(ImU32 color = IM_COL32(11, 109, 191, 255), ImU32 colorSel
 
 bool UiNode::drawGui() {
 	bool params_changed = generator->drawGui();
-	if (ImGui::Button("Save heightmap")) {
-		dynamc.save("test_heightmap.png");
-		printf("Save heightmap\n");
-	}
+	// if (ImGui::Button("Save heightmap")) {
+	// 	dynamc.save("test_heightmap.png");
+	// 	printf("Save heightmap\n");
+	// }
 	// ImGui::Text("Debug information");
 	// ImGui::Text("Node id: %d", id);
 	// ImGui::Text("Links %d", links.size());

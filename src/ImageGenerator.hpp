@@ -68,6 +68,7 @@ public:
 			}
 
 			int w, h, channels;
+			stbi_set_flip_vertically_on_load(true);
 			unsigned char *tex_ptr = stbi_load(src.c_str(), &w, &h, &channels, 1);
 			if (tex_ptr != NULL) {
 				bool resized = false;

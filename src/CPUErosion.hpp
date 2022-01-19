@@ -209,6 +209,10 @@ public:
 
 				speed = sqrt(max(0.0f, speed * speed + dheight * gravity));
 				water *= (1 - evaporationRate);
+				
+				if (water <= 0.0f) {
+					break;
+				}
 			}
 
 		}
@@ -239,7 +243,7 @@ public:
 	}
 
 	const char* getName() {
-		return "CPUErosion";
+		return "Erosion";
 	}
 
 	bool setInput(int index, DynamcTexture* dynamc) {
