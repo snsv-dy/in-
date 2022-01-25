@@ -38,7 +38,7 @@ UiNode::UiNode(const json& json_data): dynamc{texWidth, texWidth, json_data["typ
 	ImU32 color = NODE_COLOR_DEFAULT;
 	ImU32 colorSelected = NODE_COLOR_DEFAULT_SELECTED;
 
-	if (type == 5 || type == 6 || type == 7 || type == 8) {
+	if (type == 2 || type == 5 || type == 6 || type == 7 || type == 8) {
 		// this->inputs.push_back(++current_id);
 		// this->inputs.push_back(++current_id);
 		color = NODE_COLOR_GREEN;

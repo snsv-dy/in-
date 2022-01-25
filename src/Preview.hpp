@@ -15,9 +15,9 @@ using namespace std;
 
 class Preview {
 	unsigned int fbo = 0;
-	const unsigned int fb_size = 2000;
 	unsigned int rbo = 0;
 public:
+	const unsigned int fb_size = 2000;
 	unsigned int fbTexture = 0;
 	glm::mat4 projection = glm::perspective(glm::radians(55.0f), 1.0f, 0.1f, 1000.0f);
 	glm::vec2 cameraRotation = glm::vec2(0.0f);

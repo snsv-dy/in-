@@ -124,134 +124,34 @@ public:
 
 	void gen() {
 		if (dynamc != nullptr && !dynamc->monochrome && input1 != nullptr) {
-			noise.SetFrequency(noise_frequency);
 			const auto [width, height] = dynamc->getSize();
 			float fwidth = (float)width;
 			float fheight = (float)height;
-
 			
 			for (int y = 0; y < height; y++) {
 				int yw = y * width;
 
 				for (int x = 0; x < width; x++) {
 					int index = (yw + x);
-					dynamc->data[index * 3] = .0f;
-					dynamc->data[index * 3 + 1] = .0f;
-					dynamc->data[index * 3 + 2] = .0f;
-				}
-			}
-			for (int y = 0; y < height; y++) {
-				int yw = y * width;
+					float input_value = input1->data[index];
 
-				for (int x = 0; x < width; x++) {
-					int index = (yw + x);
-					float height = input1->data[index];
-					float rlerp = 0.f;//noise.GetNoise((float)x, (float)y) * .5f + .5f;
+					// for (auto [threshold, color] : colorSteps) {
+					for (int i = 0; i < colorSteps.size(); i++) {
+						auto [threshold, color] = colorSteps[i];
+						if (input_value >= threshold) {
+							ImVec4 result = color;
+							if (i < colorSteps.size() - 1) {
+								auto [threshold1, next_color] = colorSteps[i + 1];
+								float distance = threshold1 - threshold;
+        						float delta = (input_value - threshold) / distance;
+								result = ImLerp(result, next_color, delta);
+							}	
 
-					// for (int i = 0; i < colorSteps.size() - 1; i++) {
-					for (int i = 0; i < 1; i++) {
-						auto [t1, c1] = colorSteps[i];
-						auto [t2, c2] = colorSteps[i + 1];
-						// t1 /= 2.0f; // t1 is 0.0 - 1.0, and for blending should be 0.0 - 0.5
-						
-						// height = height + (rlerp - .5f);// * lerp - (t1 * 2.f - 1.f);
-						// float blend = blendValue(height + (rlerp - .5f) * lerp - (t1 * 2.f - 1.f), .5f);
-						float blend = blendValue(height - t1, lerp);
-						
-						if (height >= t1) {
-							ImVec4 result = ImLerp(c1, c2, blend);	
 							dynamc->data[index * 3] = result.x;
 							dynamc->data[index * 3 + 1] = result.y;
 							dynamc->data[index * 3 + 2] = result.z;
 						}
 					}
-					// float a = t1;
-					// float b = 1.0f - t1;
-					// float ba = b - a;
-
-					// float blend = 1.0f / ba * (height - a);
-					// blend = ImSaturate(blend);
-
-					// float left = blend;
-					// float right = (1.0f - blend);
-
-					// ImVec4 result;
-					// c1 = ImLerp(c1, c2, (right - left) * lerp);
-
-
-					// float height2 = fmin(blend, rlerp);
-					// float blend2 = 1.0f / (1.0f - 2.0f * lerp) * (height2 - lerp);
-					// float height2 = blend == 0.0f || blend == 1.0f ? blend : //.7f + (blend - rlerp) * .3f;
-					// 	// blend > 0.5f ? fmin(1.0f, blend < rlerp): 1.0f;
-					// 	blend > rlerp ? .5f + (blend - rlerp) * .5f : .5f - (rlerp - blend) * .5f;
-					// float height2;
-					// if (blend == 0.0f || blend == 1.0f) {
-					// 	height2 = blend;
-					// } else {
-					// 	height2 = blend;
-						// float blend2 = 1.0f / (1.0f - 2.0f * lerp) * (rlerp - lerp);
-						// blend2 = ImSaturate(blend2);
-
-						// if (blend > rlerp) {
-						// 	// float blend3 = 1.0f / (1.0f - 2.0f * lerp) * (max(rlerp - lerp, 0.f));
-						// 	// blend3 = ImSaturate(blend3);
-						// 	height2 = 1.f;//blend3;	
-						// } else {
-						// 	float blend3 = 1.0f / (1.0f - 2.0f * lerp) * (blend2 - lerp);
-						// 	blend3 = ImSaturate(blend3);
-						// 	height2 = max((1.f - blend2), .0f);	
-						// }
-						// height2 = (blend > rlerp) * (1.f - blend2);// + (1.f - blend2) * (blend >= rlerp);
-					// }
-
-					// result = ImLerp(c1, c2, height2);
-					// dynamc->data[index * 3] = result.x;
-					// dynamc->data[index * 3 + 1] = result.y;
-					// dynamc->data[index * 3 + 2] = result.z;
-					// if (left - right < rlerp) {
-					// 	// float a2 = fmax(a, lerp);
-					// 	// float ba2 = 1.0f - 2.0f * a2;
-					// 	// float blend2 = 1.0f / ba2 * (height - a2);
-					// 	// blend2 = ImSaturate(blend2);
-					// 	result = ImLerp(c1, c2, left - right);
-					// 	// float l = rlerp;// * rlerp;
-					// 	// float r = 1.0f - rlerp;// * (1.0f - rlerp);
-						
-					// 	// result.x = c2.x * left + c1.x * right;
-					// 	// result.y = c2.y * left + c1.y * right;
-					// 	// result.z = c2.z * left + c1.z * right;
-
-					// 	dynamc->data[index * 3] = result.x;
-					// 	dynamc->data[index * 3 + 1] = result.y;
-					// 	dynamc->data[index * 3 + 2] = result.z;
-					// } else {
-					// 	// result = ImLerp(c2, c1, lerp);
-					// 	dynamc->data[index * 3] = c2.x;
-					// 	dynamc->data[index * 3 + 1] = c2.y;
-					// 	dynamc->data[index * 3 + 2] = c2.z;						
-					// }
-
-					// result.x = c1.x * left + c2.x * right;
-					// result.y = c1.y * left + c2.y * right;
-					// result.z = c1.z * left + c2.z * right;
-
-
-					// for (int i = 0; i < colorSteps.size(); i++) {
-					// 	auto [threshold, color] = colorSteps[i];
-					// 	if (input_value >= threshold) {
-					// 		ImVec4 result = color;
-					// 		if (i < colorSteps.size() - 1) {
-					// 			auto [threshold1, next_color] = colorSteps[i + 1];
-					// 			float distance = threshold1 - threshold;
-        			// 			float delta = (input_value - threshold) / distance;
-					// 			result = result;//ImLerp(result, next_color, delta);
-					// 		}	
-
-					// 		dynamc->data[index * 3] = result.x;
-					// 		dynamc->data[index * 3 + 1] = result.y;
-					// 		dynamc->data[index * 3 + 2] = result.z;
-					// 	}
-					// }
 				}
 			}
 

@@ -57,7 +57,7 @@ public:
 		int x = (int)floor(posx);
 		int y = (int)floor(posy);
 		int mapw = 512;
-		// if (x > 0 && x < 511 && y > 0 && y < 511) {
+		if (x > 0 && x < 511 && y > 0 && y < 511) {
 			float NW = map[y * mapw + x];
 			float NE = map[y * mapw + x + 1];
 			float SW = map[(y + 1) * mapw + x];
@@ -76,7 +76,7 @@ public:
 			return_data[2] = height;
 
 			return true;
-		// }
+		}
 
 		return_data[0] = 0.0f;
 		return_data[1] = 0.0f;
@@ -150,6 +150,11 @@ public:
 				float cellx = posx - oldix;
 				float celly = posy - oldiy;
 
+				if (posx < 0 || posx >= w - 1 || posy < 0 || posy >= h - 1) {
+					// printf("breka\n");
+					break;
+				}
+
 				float gr_data[3];
 				bool gradres = gradient(dataPtr, posx, posy, gr_data);
 				if (!gradres) {
@@ -166,11 +171,6 @@ public:
 
 				posx += dirx;
 				posy += diry;
-
-				if (posx < 0 || posx >= w - 1 || posy < 0 || posy >= h - 1) {
-					// printf("breka\n");
-					break;
-				}
 
 				float oldHeight = gr_data[2];
 				gradres = gradient(dataPtr, posx, posy, gr_data);

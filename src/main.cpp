@@ -244,11 +244,18 @@ int opengl_context(GLFWwindow* window) {
 			default_preview.setLightPos();
 		}
 
+		if (ImGui::MenuItem("Export view image")) {
+			if (activeNode != nullptr) {
+				ImGuiFileDialog::Instance()->OpenDialog("ExportView", "Choose File", ".png,.*", ".", "", 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
+			}
+		}
+		
+
 		// ImGui::MenuItem("Zapisz jako");
 		// ImGui::MenuItem("Ostatnie pliki");
 		ImGui::EndMainMenuBar();
 
-		ImGui::Begin("Teren");
+		ImGui::Begin("Terrain");
 		ImVec2 pos = ImGui::GetWindowPos();
 		ImVec2 size = ImGui::GetWindowSize();
 
@@ -406,6 +413,44 @@ int opengl_context(GLFWwindow* window) {
 				// node_editor.load();
 				// project_name = "[" + ImGuiFileDialog::Instance()->GetCurrentFileName() + "]";
 				// glfwSetWindowTitle(window, project_name.c_str());
+			}
+
+			ImGuiFileDialog::Instance()->Close();
+		}
+
+		if (ImGuiFileDialog::Instance()->Display("ExportView")) {
+			if (ImGuiFileDialog::Instance()->IsOk()) {
+				if (activeNode != nullptr) {
+					// DynamcTexture tdynamc(default_preview.fb_size, default_preview.fb_size, false);
+
+						unsigned char* tdata = new unsigned char[default_preview.fb_size * default_preview.fb_size * 3];
+
+						// Load initial height
+						glBindTexture(GL_TEXTURE_2D, default_preview.fbTexture);
+						// glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, tex_w, tex_h, 0, GL_RGBA, GL_FLOAT, tdata);
+						glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, tdata);
+						glBindTexture(GL_TEXTURE_2D, 0);
+
+						// for (int y = 0; y < default_preview.fb_size; y++) {
+						// 	for (int x = 0; x < default_preview.fb_size; x++) {
+						// 		int index = (y * default_preview.fb_size + x);
+						// 		tdynamc.data[index] = tdata[index * 4];
+						// 		tdynamc.data[index + 1] = tdata[index * 4 + 1];
+						// 		tdynamc.data[index + 2] = tdata[index * 4 + 2];
+						// 	}
+						// }
+						// tdynamc.save(ImGuiFileDialog::Instance()->GetFilePathName().c_str());
+
+					int write_result = stbi_write_png(ImGuiFileDialog::Instance()->GetFilePathName().c_str(), default_preview.fb_size, default_preview.fb_size, 3, tdata, default_preview.fb_size * 3);
+					if (write_result == 0) {
+						printf("Texture saving failed\n");
+					}
+
+						delete[] tdata;
+
+						// dynamc->updateGL();
+					// }
+				}
 			}
 
 			ImGuiFileDialog::Instance()->Close();
