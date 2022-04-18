@@ -9,6 +9,8 @@ Simple heightmap generator, that creates terrain by combining nodes responsible 
 * Saving project in JSON format
 * Preview of multiple nodes at once
 
+https://user-images.githubusercontent.com/52980049/163799143-85558d8a-0201-4711-b805-342ca961dbe7.mp4
+
 ## Used libraries
 * https://github.com/nlohmann/json
 * ![Dear ImGui](https://github.com/ocornut/imgui), with extensions:
